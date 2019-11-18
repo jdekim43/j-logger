@@ -1,19 +1,20 @@
-//import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
-//import com.jfrog.bintray.gradle.BintrayExtension
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import java.util.Date
 
 plugins {
     kotlin("jvm") version "1.3.50"
-//    id("com.github.johnrengelman.shadow") version "2.0.2"
-//    `maven-publish`
-//    id("com.jfrog.bintray") version "1.8.4"
+    `maven-publish`
+    id("com.jfrog.bintray") version "1.8.4"
 }
 
-group = "kr.jadekim"
-version = "1.0.0"
-//val artifactID = "j-logger"
+val artifactName = "j-logger"
+val artifactGroup = "kr.jadekim"
+val artifactVersion = "1.0.0"
+group = artifactGroup
+version = artifactVersion
 
 repositories {
+    jcenter()
     mavenCentral()
 }
 
@@ -34,47 +35,40 @@ tasks.withType<KotlinCompile> {
     kotlinOptions.jvmTarget = "1.8"
 }
 
-//val shadowJar: ShadowJar by tasks
-//shadowJar.apply {
-//    baseName = artifactID
-//    classifier = null
-//}
-//
-//val publicationName = "JLogger"
-//publishing {
-//    publications.invoke {
-//        publicationName(MavenPublication::class) {
-//            artifactId = artifactID
-//            artifact(shadowJar)
-//            with(pom) {
-//                withXml {
-//                    asNode().appendNode("dependencies").let { node ->
-//                        configurations.compile.allDependencies.forEach {
-//                            node.appendNode("dependency").apply {
-//                                appendNode("groupId", it.group)
-//                                appendNode("artifactId", it.name)
-//                                appendNode("version", it.version)
-//                            }
-//                        }
-//                    }
-//                }
-//            }
-//        }
-//    }
-//}
-//
-//bintray {
-//    user = System.getenv("BINTRAY_USER")
-//    key = System.getenv("BINTRAY_KEY")
-//    dryRun = false
-//    publish = true
-//    override = true
-//    setPublications(publicationName)
-//    pkg(delegateClosureOf<BintrayExtension.PackageConfig> {
-//        repo = "maven"
-//        name = "j-logger"
-//        userOrg = "jdekim43"
-//        vcsUrl = "https://github.com/jdekim43/j-logger.git"
-//        setLicenses("MIT")
-//    })
-//}
+val sourcesJar by tasks.creating(Jar::class) {
+    archiveClassifier.set("sources")
+    from(sourceSets.getByName("main").allSource)
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("lib") {
+            groupId = artifactGroup
+            artifactId = artifactName
+            version = artifactVersion
+            from(components["java"])
+            artifact(sourcesJar)
+        }
+    }
+}
+
+bintray {
+    user = System.getenv("BINTRAY_USER")
+    key = System.getenv("BINTRAY_KEY")
+
+    publish = true
+
+    setPublications("lib")
+
+    pkg.apply {
+        repo = "maven"
+        name = rootProject.name
+        setLicenses("MIT")
+        setLabels("kotlin", "logger")
+        vcsUrl = "https://github.com/jdekim43/j-logger.git"
+        version.apply {
+            name = artifactVersion
+            released = Date().toString()
+        }
+    }
+}
