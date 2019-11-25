@@ -9,7 +9,7 @@ plugins {
 
 val artifactName = "j-logger"
 val artifactGroup = "kr.jadekim"
-val artifactVersion = "1.0.0"
+val artifactVersion = "1.0.1"
 group = artifactGroup
 version = artifactVersion
 
@@ -20,10 +20,13 @@ repositories {
 
 dependencies {
     val kotlinxCoroutineVersion: String by project
+    val slf4jVersion: String by project
     val jacksonVersion: String by project
 
     implementation(kotlin("stdlib-jdk8"))
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinxCoroutineVersion")
+
+    implementation("org.slf4j:slf4j-api:$slf4jVersion")
 
     implementation("com.fasterxml.jackson.core:jackson-core:$jacksonVersion")
     implementation("com.fasterxml.jackson.core:jackson-annotations:$jacksonVersion")

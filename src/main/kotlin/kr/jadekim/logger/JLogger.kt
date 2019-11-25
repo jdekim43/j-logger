@@ -1,24 +1,26 @@
 package kr.jadekim.logger
 
+import kr.jadekim.logger.context.CoroutineLogContext
+import kr.jadekim.logger.context.ThreadLogContext
 import kr.jadekim.logger.model.Level
 import kr.jadekim.logger.model.Log
 import kr.jadekim.logger.processor.LoggingProcessor
+import kotlin.coroutines.coroutineContext
 
 class JLogger(
     val name: String,
     var level: Level,
-    private val processor: LoggingProcessor
+    private val processorProvider: () -> LoggingProcessor
 ) {
 
     fun log(
         level: Level,
         message: String,
         throwable: Throwable? = null,
-        extra: Map<String, Any> = emptyMap(),
-        context: Map<String, Any> = emptyMap()
+        extra: Map<String, Any> = emptyMap()
     ) {
         if (this.level.isPrintable(level)) {
-            processor.log(Log(name, level, message, throwable, extra, context))
+            processorProvider().log(Log(name, level, message, throwable, extra, ThreadLogContext.get()))
         }
     }
 
@@ -40,5 +42,44 @@ class JLogger(
 
     fun trace(message: String, throwable: Throwable? = null, extra: Map<String, Any> = emptyMap()) {
         log(Level.TRACE, message, throwable, extra)
+    }
+
+    suspend fun sLog(
+        level: Level,
+        message: String,
+        throwable: Throwable? = null,
+        extra: Map<String, Any> = emptyMap()
+    ) {
+        if (this.level.isPrintable(level)) {
+            processorProvider().log(
+                Log(
+                    name, level,
+                    message,
+                    throwable,
+                    extra,
+                    coroutineContext[CoroutineLogContext]?.get() ?: ThreadLogContext.get()
+                )
+            )
+        }
+    }
+
+    suspend fun sError(message: String, throwable: Throwable? = null, extra: Map<String, Any> = emptyMap()) {
+        sLog(Level.ERROR, message, throwable, extra)
+    }
+
+    suspend fun sWarning(message: String, throwable: Throwable? = null, extra: Map<String, Any> = emptyMap()) {
+        sLog(Level.WARNING, message, throwable, extra)
+    }
+
+    suspend fun sInfo(message: String, throwable: Throwable? = null, extra: Map<String, Any> = emptyMap()) {
+        sLog(Level.INFO, message, throwable, extra)
+    }
+
+    suspend fun sDebug(message: String, throwable: Throwable? = null, extra: Map<String, Any> = emptyMap()) {
+        sLog(Level.DEBUG, message, throwable, extra)
+    }
+
+    suspend fun sTrace(message: String, throwable: Throwable? = null, extra: Map<String, Any> = emptyMap()) {
+        sLog(Level.TRACE, message, throwable, extra)
     }
 }

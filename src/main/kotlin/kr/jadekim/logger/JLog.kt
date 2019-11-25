@@ -15,7 +15,7 @@ object JLog {
     private val interceptors = mutableListOf<LogInterceptor>()
     private val printers = mutableListOf<LogPrinter>()
 
-    private var processor = LoggingProcessor(interceptors, printers)
+    internal var processor = LoggingProcessor(interceptors, printers)
 
     fun enableAsync() {
         processor = AsyncLoggingProcessor(interceptors, printers)
@@ -38,7 +38,7 @@ object JLog {
     }
 
     fun get(name: String, level: Level = Level.INFO): JLogger {
-        return loggerMap.getOrPut(name) { JLogger(name, level, processor) }
+        return loggerMap.getOrPut(name) { JLogger(name, level) { processor } }
     }
 }
 
