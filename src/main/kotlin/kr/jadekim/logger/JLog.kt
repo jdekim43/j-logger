@@ -6,7 +6,9 @@ import kr.jadekim.logger.model.Level
 import kr.jadekim.logger.printer.LogPrinter
 import kr.jadekim.logger.processor.AsyncLoggingProcessor
 import kr.jadekim.logger.processor.LoggingProcessor
+import kotlin.reflect.KClass
 import kotlin.reflect.KProperty
+import kotlin.reflect.jvm.jvmName
 
 object JLog {
 
@@ -14,6 +16,9 @@ object JLog {
 
     private val interceptors = mutableListOf<LogInterceptor>()
     private val printers = mutableListOf<LogPrinter>()
+
+    private val exactlyLoggerLevel = mutableMapOf<String, Level>()
+    private val prefixLoggerLevel = mutableListOf<Pair<String, Level>>()
 
     internal var processor = LoggingProcessor(interceptors, printers)
 
@@ -37,8 +42,27 @@ object JLog {
         printers.add(printer)
     }
 
-    fun get(name: String, level: Level = Level.INFO): JLogger {
-        return loggerMap.getOrPut(name) { JLogger(name, level) { processor } }
+    fun exactly(loggerName: String, level: Level) {
+        exactlyLoggerLevel[loggerName] = level
+    }
+
+    fun prefix(loggerName: String, level: Level) {
+        prefixLoggerLevel.add(loggerName to level)
+        prefixLoggerLevel.sortByDescending { it.first }
+    }
+
+    fun get(name: String): JLogger {
+        return loggerMap.getOrPut(name) { JLogger(name, getDefaultLevel(name)) { processor } }
+    }
+
+    fun get(clazz: KClass<*>) = get(clazz.qualifiedName ?: clazz.jvmName)
+
+    fun get(clazz: Class<*>) = get(clazz.canonicalName)
+
+    private fun getDefaultLevel(loggerName: String): Level {
+        return exactlyLoggerLevel[loggerName]
+            ?: prefixLoggerLevel.firstOrNull { it.first.startsWith(loggerName) }?.second
+            ?: Level.TRACE
     }
 }
 

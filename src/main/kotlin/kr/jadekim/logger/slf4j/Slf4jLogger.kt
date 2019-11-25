@@ -9,7 +9,7 @@ class Slf4jLogger(
     private val name: String
 ) : Logger {
 
-    private val logger = JLog.get(name, Level.TRACE)
+    private val logger = JLog.get(name)
 
     override fun getName(): String = name
 

@@ -5,8 +5,8 @@ data class Log(
     val level: Level,
     val message: String,
     val throwable: Throwable?,
-    val extra: Map<String, Any>,
-    val context: Map<String, Any> = emptyMap(),
+    val extra: Map<String, Any?>,
+    val context: Map<String, Any?> = emptyMap(),
     val timestamp: Long = System.currentTimeMillis(),
     val thread: String = Thread.currentThread().name
 ) {
