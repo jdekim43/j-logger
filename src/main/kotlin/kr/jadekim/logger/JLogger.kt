@@ -19,7 +19,7 @@ class JLogger(
         throwable: Throwable? = null,
         extra: Map<String, Any?> = emptyMap()
     ) {
-        if (this.level.isPrintable(level)) {
+        if (level.isPrintable(this.level)) {
             processorProvider().log(
                 Log(
                     name,
@@ -59,7 +59,7 @@ class JLogger(
         throwable: Throwable? = null,
         extra: Map<String, Any?> = emptyMap()
     ) {
-        if (this.level.isPrintable(level)) {
+        if (level.isPrintable(this.level)) {
             processorProvider().log(
                 Log(
                     name, level,

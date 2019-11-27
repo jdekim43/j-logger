@@ -11,7 +11,7 @@ class DefaultLogFormatter : LogFormatter {
 
     override fun format(log: Log): String {
         return StringBuilder().apply {
-            append(dateFormatter.format(Date(log.timestamp)))
+            append("%-23s".format(dateFormatter.format(Date(log.timestamp))))
             append(" %-5s".format(log.level.name))
             append(" %-32s".format(log.loggerName))
             append(" [ %-20s ]".format(log.thread))
