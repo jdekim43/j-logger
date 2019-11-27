@@ -12,6 +12,8 @@ import kotlin.reflect.jvm.jvmName
 
 object JLog {
 
+    var defaultLoggerLevel = Level.TRACE
+
     private val loggerMap = mutableMapOf<String, JLogger>()
 
     private val interceptors = mutableListOf<LogInterceptor>()
@@ -62,7 +64,7 @@ object JLog {
     private fun getDefaultLevel(loggerName: String): Level {
         return exactlyLoggerLevel[loggerName]
             ?: prefixLoggerLevel.firstOrNull { it.first.startsWith(loggerName) }?.second
-            ?: Level.TRACE
+            ?: defaultLoggerLevel
     }
 }
 

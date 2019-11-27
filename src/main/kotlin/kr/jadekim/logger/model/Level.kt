@@ -7,5 +7,5 @@ enum class Level {
     DEBUG,
     TRACE;
 
-    fun isPrintable(level: Level) = this.ordinal >= level.ordinal
+    fun isPrintable(level: Level) = this.ordinal <= level.ordinal
 }
