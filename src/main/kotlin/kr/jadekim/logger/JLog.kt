@@ -7,7 +7,6 @@ import kr.jadekim.logger.printer.LogPrinter
 import kr.jadekim.logger.processor.AsyncLoggingProcessor
 import kr.jadekim.logger.processor.LoggingProcessor
 import kotlin.reflect.KClass
-import kotlin.reflect.KProperty
 import kotlin.reflect.jvm.jvmName
 
 object JLog {
@@ -66,40 +65,4 @@ object JLog {
             ?: prefixLoggerLevel.firstOrNull { it.first.startsWith(loggerName) }?.second
             ?: defaultLoggerLevel
     }
-}
-
-class CachedLogger<R : Any> {
-    private var logger: JLogger? = null
-
-    operator fun getValue(thisRef: R, property: KProperty<*>): JLogger {
-        return logger ?: setValue(thisRef, property, JLog.get(thisRef::class.java.canonicalName))
-    }
-
-    operator fun setValue(thisRef: R, property: KProperty<*>, value: JLogger): JLogger {
-        logger = value
-
-        return value
-    }
-}
-
-var Any.logger: JLogger by CachedLogger()
-
-fun Any.error(message: String, throwable: Throwable? = null, extra: Map<String, Any> = emptyMap()) {
-    logger.log(Level.ERROR, message, throwable, extra)
-}
-
-fun Any.warning(message: String, throwable: Throwable? = null, extra: Map<String, Any> = emptyMap()) {
-    logger.log(Level.WARNING, message, throwable, extra)
-}
-
-fun Any.info(message: String, throwable: Throwable? = null, extra: Map<String, Any> = emptyMap()) {
-    logger.log(Level.INFO, message, throwable, extra)
-}
-
-fun Any.debug(message: String, throwable: Throwable? = null, extra: Map<String, Any> = emptyMap()) {
-    logger.log(Level.DEBUG, message, throwable, extra)
-}
-
-fun Any.trace(message: String, throwable: Throwable? = null, extra: Map<String, Any> = emptyMap()) {
-    logger.log(Level.TRACE, message, throwable, extra)
 }
