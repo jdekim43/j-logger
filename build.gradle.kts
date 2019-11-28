@@ -9,7 +9,7 @@ plugins {
 
 val artifactName = "j-logger"
 val artifactGroup = "kr.jadekim"
-val artifactVersion = "1.0.8"
+val artifactVersion = "1.0.9"
 group = artifactGroup
 version = artifactVersion
 
