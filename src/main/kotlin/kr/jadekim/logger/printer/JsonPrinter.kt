@@ -13,14 +13,12 @@ import java.io.StringWriter
 
 class JsonPrinter(
     mapper: ObjectMapper = jacksonObjectMapper(),
-    private val output: OutputStream = System.out,
+    output: OutputStream = System.out,
     override var printStackTrace: Boolean = true,
     var traceMaxLength: Int = 12
 ) : LogPrinter {
 
-    companion object {
-        private const val NEWLINE_CHARACTER = '\n'.toInt()
-    }
+    private val writer = PrintWriter(output)
 
     private val throwableModule = SimpleModule().apply {
         addSerializer(Throwable::class.java, ThrowableSerializer())
@@ -31,9 +29,9 @@ class JsonPrinter(
         .registerModule(throwableModule)
 
     override fun print(log: Log) {
-        mapper.writeValue(output, log)
-        output.write(NEWLINE_CHARACTER)
-        output.flush()
+        mapper.writeValue(writer, log)
+        writer.println()
+        writer.flush()
     }
 
     private inner class ThrowableSerializer : JsonSerializer<Throwable>() {

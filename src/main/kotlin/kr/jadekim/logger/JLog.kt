@@ -62,7 +62,7 @@ object JLog {
 
     private fun getDefaultLevel(loggerName: String): Level {
         return exactlyLoggerLevel[loggerName]
-            ?: prefixLoggerLevel.firstOrNull { it.first.startsWith(loggerName) }?.second
+            ?: prefixLoggerLevel.firstOrNull { loggerName.startsWith(it.first) }?.second
             ?: defaultLoggerLevel
     }
 }
