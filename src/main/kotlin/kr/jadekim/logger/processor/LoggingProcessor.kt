@@ -39,8 +39,8 @@ open class LoggingProcessor(
             realLog = interceptor.convert(log)
         }
 
-        print(log)
-        logQueue.offer(log)
+        print(realLog)
+        logQueue.offer(realLog)
     }
 
     protected open fun print(log: Log) {
