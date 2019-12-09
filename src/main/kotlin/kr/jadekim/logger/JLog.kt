@@ -4,7 +4,6 @@ import kr.jadekim.logger.interceptor.ClassLoggerAutoNamer
 import kr.jadekim.logger.interceptor.LogInterceptor
 import kr.jadekim.logger.model.Level
 import kr.jadekim.logger.printer.LogPrinter
-import kr.jadekim.logger.processor.AsyncLoggingProcessor
 import kr.jadekim.logger.processor.LoggingProcessor
 import kotlin.reflect.KClass
 import kotlin.reflect.jvm.jvmName
@@ -17,19 +16,12 @@ object JLog {
 
     private val interceptors = mutableListOf<LogInterceptor>()
     private val printers = mutableListOf<LogPrinter>()
+    private val asyncPrinters = mutableListOf<LogPrinter>()
 
     private val exactlyLoggerLevel = mutableMapOf<String, Level>()
     private val prefixLoggerLevel = mutableListOf<Pair<String, Level>>()
 
-    internal var processor = LoggingProcessor(interceptors, printers)
-
-    fun enableAsync() {
-        processor = AsyncLoggingProcessor(interceptors, printers)
-    }
-
-    fun enableAsync(capacity: Int) {
-        processor = AsyncLoggingProcessor(interceptors, printers, capacity)
-    }
+    private val processor = LoggingProcessor(interceptors, printers, asyncPrinters)
 
     fun addInterceptor(interceptor: LogInterceptor) {
         interceptors.add(interceptor)
@@ -43,6 +35,10 @@ object JLog {
         printers.add(printer)
     }
 
+    fun addAsyncPrinter(printer: LogPrinter) {
+        asyncPrinters.add(printer)
+    }
+
     fun exactly(loggerName: String, level: Level) {
         exactlyLoggerLevel[loggerName] = level
     }
@@ -53,7 +49,7 @@ object JLog {
     }
 
     fun get(name: String): JLogger {
-        return loggerMap.getOrPut(name) { JLogger(name, getDefaultLevel(name)) { processor } }
+        return loggerMap.getOrPut(name) { JLogger(name, getDefaultLevel(name), processor) }
     }
 
     fun get(clazz: KClass<*>) = get(clazz.qualifiedName ?: clazz.jvmName)

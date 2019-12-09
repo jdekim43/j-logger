@@ -10,7 +10,7 @@ import kr.jadekim.logger.processor.LoggingProcessor
 class JLogger(
     val name: String,
     var level: Level,
-    private val processorProvider: () -> LoggingProcessor
+    private val processor: LoggingProcessor
 ) {
 
     fun log(
@@ -20,7 +20,7 @@ class JLogger(
         extra: Map<String, Any?> = emptyMap()
     ) {
         if (level.isPrintable(this.level)) {
-            processorProvider().log(
+            processor.log(
                 Log(
                     name,
                     level,
@@ -60,7 +60,7 @@ class JLogger(
         extra: Map<String, Any?> = emptyMap()
     ) {
         if (level.isPrintable(this.level)) {
-            processorProvider().log(
+            processor.log(
                 Log(
                     name, level,
                     message,
