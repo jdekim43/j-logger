@@ -21,7 +21,7 @@ object JLog {
     private val exactlyLoggerLevel = mutableMapOf<String, Level>()
     private val prefixLoggerLevel = mutableListOf<Pair<String, Level>>()
 
-    private val processor = LoggingProcessor(interceptors, printers, asyncPrinters)
+    internal val processor = LoggingProcessor(interceptors, printers, asyncPrinters)
 
     fun addInterceptor(interceptor: LogInterceptor) {
         interceptors.add(interceptor)
