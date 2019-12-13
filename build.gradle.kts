@@ -9,7 +9,7 @@ plugins {
 
 val artifactName = "j-logger"
 val artifactGroup = "kr.jadekim"
-val artifactVersion = "1.0.12"
+val artifactVersion = "1.0.13"
 group = artifactGroup
 version = artifactVersion
 
@@ -22,16 +22,19 @@ dependencies {
     val kotlinxCoroutineVersion: String by project
     val slf4jVersion: String by project
     val jacksonVersion: String by project
+    val okHttpVersion: String by project
+    val koinVersion: String by project
 
     implementation(kotlin("stdlib-jdk8"))
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinxCoroutineVersion")
 
     compileOnly("org.slf4j:slf4j-api:$slf4jVersion")
 
-    compileOnly("com.fasterxml.jackson.core:jackson-core:$jacksonVersion")
-    compileOnly("com.fasterxml.jackson.core:jackson-annotations:$jacksonVersion")
-    compileOnly("com.fasterxml.jackson.core:jackson-databind:$jacksonVersion")
     compileOnly("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion")
+
+    compileOnly("com.squareup.okhttp3:logging-interceptor:$okHttpVersion")
+
+    compileOnly("org.koin:koin-core:$koinVersion")
 }
 
 tasks.withType<KotlinCompile> {
