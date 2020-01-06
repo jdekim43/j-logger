@@ -17,11 +17,13 @@ class DefaultLogFormatter(
             append(" %-5s".format(log.level.name))
             append(" %-32s".format(log.loggerName))
             append(" [ %-20s ]".format(log.thread))
-            append(" : ${log.message}(")
+            append(" : ${log.message}")
         }
 
-        log.extra.map { "${it.key}=${it.value}" }.joinTo(builder, ", ")
+        if (printExtra && log.extra.isNotEmpty()) {
+            log.extra.map { "${it.key}=${it.value}" }.joinTo(builder, ", ", prefix = "(", postfix = ")")
+        }
 
-        return builder.append(")\n").toString()
+        return builder.appendln().toString()
     }
 }
