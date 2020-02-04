@@ -2,14 +2,14 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.util.Date
 
 plugins {
-    kotlin("jvm") version "1.3.50"
+    kotlin("jvm") version "1.3.61"
     `maven-publish`
     id("com.jfrog.bintray") version "1.8.4"
 }
 
 val artifactName = "j-logger"
 val artifactGroup = "kr.jadekim"
-val artifactVersion = "1.0.15"
+val artifactVersion = "1.0.16"
 group = artifactGroup
 version = artifactVersion
 
@@ -24,6 +24,7 @@ dependencies {
     val jacksonVersion: String by project
     val okHttpVersion: String by project
     val koinVersion: String by project
+    val ktorVersion: String by project
 
     implementation(kotlin("stdlib-jdk8"))
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinxCoroutineVersion")
@@ -33,12 +34,14 @@ dependencies {
     compileOnly("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion")
 
     compileOnly("com.squareup.okhttp3:logging-interceptor:$okHttpVersion")
-
     compileOnly("org.koin:koin-core:$koinVersion")
+    compileOnly("io.ktor:ktor-server-core:$ktorVersion")
 }
 
 tasks.withType<KotlinCompile> {
-    kotlinOptions.jvmTarget = "1.8"
+    val jvmTarget: String by project
+
+    kotlinOptions.jvmTarget = jvmTarget
 }
 
 val sourcesJar by tasks.creating(Jar::class) {
