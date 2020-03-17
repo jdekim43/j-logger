@@ -93,8 +93,8 @@ object ThreadLogContext : LogContext {
     override operator fun get(key: String) = get()[key]
 }
 
-data class CoroutineLogContext(
-        private var data: ConcurrentMap<String, Any?> = ConcurrentHashMap()
+class CoroutineLogContext(
+        data: Map<String, Any?> = emptyMap()
 ) : AbstractCoroutineContextElement(Key), LogContext {
 
     companion object Key : CoroutineContext.Key<CoroutineLogContext> {
@@ -102,6 +102,8 @@ data class CoroutineLogContext(
         @JvmStatic
         suspend fun get() = coroutineContext[CoroutineLogContext]?.get() ?: ThreadLogContext.get()
     }
+
+    private var data: ConcurrentMap<String, Any?> = ConcurrentHashMap(data)
 
     override fun set(data: Map<String, Any?>) {
         this.data = ConcurrentHashMap(data)
