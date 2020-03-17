@@ -1,6 +1,7 @@
 package kr.jadekim.logger.model
 
 enum class Level {
+    NONE,
     ERROR,
     WARNING,
     INFO,

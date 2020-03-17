@@ -1,5 +1,7 @@
 package kr.jadekim.logger.context
 
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.ConcurrentMap
 import kotlin.concurrent.getOrSet
 import kotlin.coroutines.AbstractCoroutineContextElement
 import kotlin.coroutines.CoroutineContext
@@ -7,9 +9,9 @@ import kotlin.coroutines.coroutineContext
 
 interface LogContext {
 
-    fun set(data: MutableMap<String, Any?>)
+    fun set(data: Map<String, Any?>)
 
-    fun get(): MutableMap<String, Any?>
+    fun get(): Map<String, Any?>
 
     fun remove(key: String)
 
@@ -22,11 +24,11 @@ interface LogContext {
 
 object EmptyLogContext : LogContext {
 
-    override fun set(data: MutableMap<String, Any?>) {
+    override fun set(data: Map<String, Any?>) {
         throw IllegalStateException("Can't set log context in EmptyLogContext")
     }
 
-    override fun get(): MutableMap<String, Any?> = mutableMapOf()
+    override fun get(): Map<String, Any?> = mutableMapOf()
 
     override fun remove(key: String) {
         throw IllegalStateException("Can't remove log context in EmptyLogContext")
@@ -47,11 +49,11 @@ object GlobalLogContext : LogContext {
 
     private var data = mutableMapOf<String, Any?>()
 
-    override fun set(data: MutableMap<String, Any?>) {
-        this.data = data
+    override fun set(data: Map<String, Any?>) {
+        this.data = data.toMutableMap()
     }
 
-    override fun get(): MutableMap<String, Any?> = data
+    override fun get(): Map<String, Any?> = data
 
     override fun remove(key: String) {
         data.remove(key)
@@ -72,8 +74,8 @@ object ThreadLogContext : LogContext {
 
     private val threadLocal = ThreadLocal<MutableMap<String, Any?>>()
 
-    override fun set(data: MutableMap<String, Any?>) {
-        threadLocal.set(data)
+    override fun set(data: Map<String, Any?>) {
+        threadLocal.set(data.toMutableMap())
     }
 
     override fun get() = threadLocal.getOrSet { mutableMapOf() }
@@ -92,19 +94,20 @@ object ThreadLogContext : LogContext {
 }
 
 data class CoroutineLogContext(
-    private var data: MutableMap<String, Any?> = mutableMapOf()
+        private var data: ConcurrentMap<String, Any?> = ConcurrentHashMap()
 ) : AbstractCoroutineContextElement(Key), LogContext {
 
     companion object Key : CoroutineContext.Key<CoroutineLogContext> {
 
+        @JvmStatic
         suspend fun get() = coroutineContext[CoroutineLogContext]?.get() ?: ThreadLogContext.get()
     }
 
-    override fun set(data: MutableMap<String, Any?>) {
-        this.data = data
+    override fun set(data: Map<String, Any?>) {
+        this.data = ConcurrentHashMap(data)
     }
 
-    override fun get(): MutableMap<String, Any?> = data
+    override fun get(): Map<String, Any?> = data
 
     override fun remove(key: String) {
         data.remove(key)
