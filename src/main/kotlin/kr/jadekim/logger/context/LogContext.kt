@@ -106,7 +106,7 @@ class CoroutineLogContext(
     private var data: ConcurrentMap<String, Any?> = ConcurrentHashMap(data)
 
     override fun set(data: Map<String, Any?>) {
-        this.data = ConcurrentHashMap(data)
+        this.data = ConcurrentHashMap(data.filter { it.value != null })
     }
 
     override fun get(): Map<String, Any?> = data
@@ -120,6 +120,10 @@ class CoroutineLogContext(
     }
 
     override fun set(key: String, value: Any?) {
+        if (value == null) {
+            return
+        }
+
         data[key] = value
     }
 
