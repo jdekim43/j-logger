@@ -2,14 +2,14 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.util.Date
 
 plugins {
-    kotlin("jvm") version "1.3.70"
+    kotlin("jvm") version "1.4.10"
     `maven-publish`
     id("com.jfrog.bintray") version "1.8.4"
 }
 
 val artifactName = "j-logger"
 val artifactGroup = "kr.jadekim"
-val artifactVersion = "1.0.19"
+val artifactVersion = "1.0.21"
 group = artifactGroup
 version = artifactVersion
 
@@ -26,7 +26,6 @@ dependencies {
     val koinVersion: String by project
     val ktorVersion: String by project
 
-    implementation(kotlin("stdlib-jdk8"))
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinxCoroutineVersion")
 
     compileOnly("org.slf4j:slf4j-api:$slf4jVersion")
