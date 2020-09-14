@@ -11,7 +11,10 @@ import java.io.OutputStream
 import java.io.PrintWriter
 import java.io.StringWriter
 
-class JsonPrinter(
+@Deprecated("Use JacksonPrinter")
+typealias JsonPrinter = JacksonPrinter
+
+class JacksonPrinter(
     mapper: ObjectMapper = jacksonObjectMapper(),
     output: OutputStream = System.out,
     override var printStackTrace: Boolean = true,

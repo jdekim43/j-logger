@@ -9,7 +9,7 @@ plugins {
 
 val artifactName = "j-logger"
 val artifactGroup = "kr.jadekim"
-val artifactVersion = "1.0.21"
+val artifactVersion = "1.0.22"
 group = artifactGroup
 version = artifactVersion
 
@@ -22,6 +22,7 @@ dependencies {
     val kotlinxCoroutineVersion: String by project
     val slf4jVersion: String by project
     val jacksonVersion: String by project
+    val gsonVersion: String by project
     val okHttpVersion: String by project
     val koinVersion: String by project
     val ktorVersion: String by project
@@ -31,6 +32,7 @@ dependencies {
     compileOnly("org.slf4j:slf4j-api:$slf4jVersion")
 
     compileOnly("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion")
+    compileOnly("com.google.code.gson:gson:$gsonVersion")
 
     compileOnly("com.squareup.okhttp3:logging-interceptor:$okHttpVersion")
     compileOnly("org.koin:koin-core:$koinVersion")
