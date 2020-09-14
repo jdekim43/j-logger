@@ -9,7 +9,7 @@ plugins {
 
 val artifactName = "j-logger"
 val artifactGroup = "kr.jadekim"
-val artifactVersion = "1.0.23"
+val artifactVersion = "1.0.24"
 group = artifactGroup
 version = artifactVersion
 
@@ -24,6 +24,7 @@ dependencies {
     val jacksonVersion: String by project
     val gsonVersion: String by project
     val okHttpVersion: String by project
+    val fuelVersion: String by project
     val koinVersion: String by project
     val ktorVersion: String by project
 
@@ -35,6 +36,7 @@ dependencies {
     compileOnly("com.google.code.gson:gson:$gsonVersion")
 
     compileOnly("com.squareup.okhttp3:logging-interceptor:$okHttpVersion")
+    compileOnly("com.github.kittinunf.fuel:fuel:$fuelVersion")
     compileOnly("org.koin:koin-core:$koinVersion")
     compileOnly("io.ktor:ktor-server-core:$ktorVersion")
 }

@@ -19,6 +19,9 @@ class OkHttpLogger(
             Level.INFO -> logger.info(message)
             Level.DEBUG -> logger.debug(message)
             Level.TRACE -> logger.trace(message)
+            Level.NONE -> {
+                //do nothing
+            }
         }
     }
 

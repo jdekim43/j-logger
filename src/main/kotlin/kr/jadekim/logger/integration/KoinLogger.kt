@@ -15,6 +15,9 @@ class KoinLogger : Logger(Level.DEBUG) {
             Level.DEBUG -> logger.debug(msg)
             Level.INFO -> logger.info(msg)
             Level.ERROR -> logger.error(msg)
+            Level.NONE -> {
+                //do nothing
+            }
         }
     }
 }
