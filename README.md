@@ -1,4 +1,5 @@
 # j-logger
+[![Download](https://api.bintray.com/packages/jdekim43/maven/j-logger/images/download.svg)](https://bintray.com/jdekim43/maven/j-logger/_latestVersion)
 * Implemented slf4j-api
 * Support sync and async printer
 * Customizable print
