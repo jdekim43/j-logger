@@ -75,8 +75,7 @@ Print logs in text type. `DefaultLogFormatter` does not print `logContext`, and 
 * output: OutputStream = System.out
 * printStackTrace: Boolean = true
 ### GsonPrinter & JacksonPrinter
-로그를 Json 형식으로 출력합니다. [Log 클래스](https://github.com/jdekim43/j-logger/blob/master/src/main/kotlin/kr/jadekim/logger/model/Log.kt) 를 Gson 혹은 Jackson 을 사용하여 json 으로 변환하여 출력합니다.
-Date 형식이나 meta 와 logContext 의 Serializer 를 변경하고 싶은 경우 Gson 와 ObjectMapper 변경을 통해 설정할 수 있습니다.
+Print logs in json type. `GsonPrinter` and `JacksonPrinter` convert [Log class](https://github.com/jdekim43/j-logger/blob/master/src/main/kotlin/kr/jadekim/logger/model/Log.kt) using `Gson` or `Jackson`.
 #### Constructor Parameter
 * gson: Gson = Gson  //or mapper: ObjectMapper = jacksonObjectMapper()
 * output: OutputStream = System.out
