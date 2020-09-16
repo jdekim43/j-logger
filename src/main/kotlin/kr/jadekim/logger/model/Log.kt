@@ -1,15 +1,15 @@
 package kr.jadekim.logger.model
 
-import com.fasterxml.jackson.annotation.JsonProperty
+import java.util.Date
 
 data class Log(
     val loggerName: String,
     val level: Level,
     val message: String,
     val throwable: Throwable?,
-    val extra: Map<String, Any?>,
-    @JsonProperty("logContext") val context: Map<String, Any?> = emptyMap(),
-    val timestamp: Long = System.currentTimeMillis(),
+    val meta: Map<String, Any?>,
+    val logContext: Map<String, Any?> = emptyMap(),
+    val timestamp: Date = Date(),
     val thread: String = Thread.currentThread().name
 ) {
 

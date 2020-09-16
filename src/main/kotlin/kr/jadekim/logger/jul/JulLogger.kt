@@ -3,6 +3,7 @@ package kr.jadekim.logger.jul
 import kr.jadekim.logger.JLog
 import kr.jadekim.logger.model.Level
 import kr.jadekim.logger.model.Log
+import java.util.Date
 import java.util.logging.Handler
 import java.util.logging.LogRecord
 import java.util.logging.Level as JulLevel
@@ -17,8 +18,9 @@ class JulLogger : Handler() {
                 level,
                 record.message,
                 record.thrown,
-                record.parameters?.mapIndexed { idx, each -> Pair(idx.toString(), each) }?.toMap() ?: emptyMap(),
-                timestamp = record.millis,
+                record.parameters?.mapIndexed { idx, each -> Pair(idx.toString(), each) }?.toMap()
+                    ?: emptyMap(),
+                timestamp = Date(record.millis),
                 thread = record.threadID.toString()
             )
         )
