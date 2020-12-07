@@ -1,10 +1,8 @@
 package kr.jadekim.logger.integration
 
-import io.ktor.application.Application
-import io.ktor.application.ApplicationCallPipeline
-import io.ktor.application.ApplicationFeature
-import io.ktor.util.AttributeKey
-import io.ktor.util.pipeline.PipelinePhase
+import io.ktor.application.*
+import io.ktor.util.*
+import io.ktor.util.pipeline.*
 import kotlinx.coroutines.withContext
 import kr.jadekim.logger.context.CoroutineLogContext
 

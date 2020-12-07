@@ -5,9 +5,9 @@ import kr.jadekim.logger.JLog
 import kr.jadekim.logger.model.Level
 
 class FuelLogger(
-        val clientName: String,
-        var logLevel: Level = Level.TRACE,
-        loggerName: String = "HttpClientLogger-$clientName"
+    val clientName: String,
+    var logLevel: Level = Level.TRACE,
+    loggerName: String = "HttpClientLogger-$clientName"
 ) {
 
     private val logger = JLog.get(loggerName)
@@ -43,7 +43,8 @@ class LogRequestInterceptor internal constructor(private val log: (Request) -> U
     }
 }
 
-class LogResponseInterceptor internal constructor(private val log: (Request, Response) -> Unit) : FoldableResponseInterceptor {
+class LogResponseInterceptor internal constructor(private val log: (Request, Response) -> Unit) :
+    FoldableResponseInterceptor {
 
     override fun invoke(next: ResponseTransformer): ResponseTransformer = { request, response ->
         log(request, response)

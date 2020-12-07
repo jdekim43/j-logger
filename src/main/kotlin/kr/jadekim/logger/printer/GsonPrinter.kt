@@ -19,7 +19,7 @@ class GsonPrinter(
     private val writer = PrintWriter(output)
 
     private val gson = gson.newBuilder()
-        .registerTypeAdapter(Throwable::class.java, ThrowableSerializer())
+        .registerTypeHierarchyAdapter(Throwable::class.java, ThrowableSerializer())
         .apply {
             if (!useCustomDateSerializer) {
                 registerTypeAdapter(Date::class.java, DateSerializer())

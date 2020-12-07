@@ -94,7 +94,7 @@ object ThreadLogContext : LogContext {
 }
 
 class CoroutineLogContext(
-        data: Map<String, Any?> = emptyMap()
+    data: Map<String, Any?> = emptyMap()
 ) : AbstractCoroutineContextElement(Key), LogContext {
 
     companion object Key : CoroutineContext.Key<CoroutineLogContext> {
