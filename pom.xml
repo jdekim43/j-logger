@@ -1,0 +1,19 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>kr.jadekim</groupId>
+	<artifactId>j-logger</artifactId>
+	<version>1.1.0</version>
+	
+	<name>j-logger</name>
+    <description>Kotlin logging library. This library implemented slf4j.</description>
+    <url>https://github.com/jdekim43/j-logger</url>
+	
+	<licenses>
+        <license>
+            <name>pache-2.0</name>
+            <url>https://opensource.org/licenses/Apache-2.0</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+</project> 
