@@ -1,21 +1,20 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-import java.util.Date
 
 plugins {
-    kotlin("jvm") version "1.4.10"
-    `maven-publish`
-    id("com.jfrog.bintray") version "1.8.4"
+    kotlin("jvm") version "1.4.21"
+    id("signing")
+    id("maven-publish")
 }
 
 val artifactName = "j-logger"
 val artifactGroup = "kr.jadekim"
-val artifactVersion = "1.1.1-rc1"
+val artifactVersion = "1.1.2"
 group = artifactGroup
 version = artifactVersion
 
 repositories {
-    jcenter()
     mavenCentral()
+    jcenter()
 }
 
 dependencies {
@@ -47,9 +46,9 @@ tasks.withType<KotlinCompile> {
     kotlinOptions.jvmTarget = jvmTarget
 }
 
-val sourcesJar by tasks.creating(Jar::class) {
-    archiveClassifier.set("sources")
-    from(sourceSets.getByName("main").allSource)
+java {
+    withJavadocJar()
+    withSourcesJar()
 }
 
 publishing {
@@ -59,28 +58,64 @@ publishing {
             artifactId = artifactName
             version = artifactVersion
             from(components["java"])
-            artifact(sourcesJar)
+
+            pom {
+                name.set("j-logger")
+                description.set("Logging Library for kotlin.")
+                url.set("https://github.com/jdekim43/j-logger")
+                licenses {
+                    license {
+                        name.set("The Apache License, Version 2.0")
+                        url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
+                    }
+                }
+                developers {
+                    developer {
+                        id.set("jdekim43")
+                        name.set("Jade Kim")
+                        email.set("jinyong@jadekim.kr")
+                    }
+                }
+                scm {
+                    connection.set("scm:git:git://github.com/j-logger.git")
+                    developerConnection.set("scm:git:ssh://github.com/j-logger.git")
+                    url.set("https://github.com/jdekim43/j-logger.git")
+                }
+            }
         }
+    }
+
+    repositories {
+        val ossrhUsername: String by project
+        val ossrhPassword: String by project
+
+        maven {
+            name = "mavenCentral"
+            setUrl("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/")
+            credentials {
+                username = ossrhUsername
+                password = ossrhPassword
+            }
+
+//            mavenContent {
+//                releasesOnly()
+//            }
+        }
+//        maven {
+//            name = "mavenCentralSnapshot"
+//            setUrl("https://s01.oss.sonatype.org/content/repositories/snapshots/")
+//            credentials {
+//                username = ossrhUsername
+//                password = ossrhPassword
+//            }
+//
+//            mavenContent {
+//                snapshotsOnly()
+//            }
+//        }
     }
 }
 
-bintray {
-    user = System.getenv("BINTRAY_USER")
-    key = System.getenv("BINTRAY_KEY")
-
-    publish = true
-
-    setPublications("lib")
-
-    pkg.apply {
-        repo = "maven"
-        name = rootProject.name
-        setLicenses("MIT")
-        setLabels("kotlin", "logger")
-        vcsUrl = "https://github.com/jdekim43/j-logger.git"
-        version.apply {
-            name = artifactVersion
-            released = Date().toString()
-        }
-    }
+signing {
+    sign(publishing.publications["lib"])
 }

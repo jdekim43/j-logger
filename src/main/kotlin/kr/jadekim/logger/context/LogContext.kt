@@ -103,7 +103,13 @@ class CoroutineLogContext(
         suspend fun get() = coroutineContext[CoroutineLogContext]?.get() ?: ThreadLogContext.get()
     }
 
-    private var data: ConcurrentMap<String, Any?> = ConcurrentHashMap(data)
+    private var data: ConcurrentMap<String, Any?> = ConcurrentHashMap()
+
+    init {
+        if (data.isNotEmpty()) {
+            set(data)
+        }
+    }
 
     override fun set(data: Map<String, Any?>) {
         this.data = ConcurrentHashMap(data.filter { it.value != null })
