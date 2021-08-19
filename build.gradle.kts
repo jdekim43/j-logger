@@ -1,121 +1,115 @@
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-
 plugins {
-    kotlin("jvm") version "1.4.21"
-    id("signing")
+    kotlin("multiplatform") version "1.5.21"
     id("maven-publish")
 }
 
-val artifactName = "j-logger"
-val artifactGroup = "kr.jadekim"
-val artifactVersion = "1.1.2"
-group = artifactGroup
-version = artifactVersion
-
-repositories {
-    mavenCentral()
-    jcenter()
-}
-
-dependencies {
-    val kotlinxCoroutineVersion: String by project
-    val slf4jVersion: String by project
-    val jacksonVersion: String by project
-    val gsonVersion: String by project
-    val okHttpVersion: String by project
-    val fuelVersion: String by project
-    val koinVersion: String by project
-    val ktorVersion: String by project
-
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinxCoroutineVersion")
-
-    implementation("org.slf4j:slf4j-api:$slf4jVersion")
-
-    compileOnly("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion")
-    compileOnly("com.google.code.gson:gson:$gsonVersion")
-
-    compileOnly("com.squareup.okhttp3:logging-interceptor:$okHttpVersion")
-    compileOnly("com.github.kittinunf.fuel:fuel:$fuelVersion")
-    compileOnly("org.koin:koin-core:$koinVersion")
-    compileOnly("io.ktor:ktor-server-core:$ktorVersion")
-}
-
-tasks.withType<KotlinCompile> {
-    val jvmTarget: String by project
-
-    kotlinOptions.jvmTarget = jvmTarget
-}
-
-java {
-    withJavadocJar()
-    withSourcesJar()
-}
-
-publishing {
-    publications {
-        create<MavenPublication>("lib") {
-            groupId = artifactGroup
-            artifactId = artifactName
-            version = artifactVersion
-            from(components["java"])
-
-            pom {
-                name.set("j-logger")
-                description.set("Logging Library for kotlin.")
-                url.set("https://github.com/jdekim43/j-logger")
-                licenses {
-                    license {
-                        name.set("The Apache License, Version 2.0")
-                        url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
-                    }
-                }
-                developers {
-                    developer {
-                        id.set("jdekim43")
-                        name.set("Jade Kim")
-                        email.set("jinyong@jadekim.kr")
-                    }
-                }
-                scm {
-                    connection.set("scm:git:git://github.com/j-logger.git")
-                    developerConnection.set("scm:git:ssh://github.com/j-logger.git")
-                    url.set("https://github.com/jdekim43/j-logger.git")
-                }
-            }
-        }
+allprojects {
+    apply {
+        plugin("maven-publish")
     }
+
+    group = "kr.jadekim"
+    version = "2.0.0-rc1"
 
     repositories {
-        val ossrhUsername: String by project
-        val ossrhPassword: String by project
+        mavenCentral()
+        maven("https://jadekim.jfrog.io/artifactory/maven/")
+    }
 
-        maven {
-            name = "mavenCentral"
-            setUrl("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/")
-            credentials {
-                username = ossrhUsername
-                password = ossrhPassword
+    configurations.all {
+        resolutionStrategy {
+            failOnVersionConflict()
+            preferProjectModules()
+
+            dependencySubstitution {
+//                substitute(module("$group:${rootProject.name}")).using(project(":"))
+
+                all {
+                    (requested as? ModuleComponentSelector)?.let {
+                        if (it.group != rootProject.group) {
+                            return@let
+                        }
+
+                        val targetProject = if (it.module == rootProject.name) {
+                            rootProject
+                        } else {
+                            findProject(":${it.module}")
+                        } ?: return@let
+
+                        useTarget(targetProject)
+                    }
+                }
             }
-
-//            mavenContent {
-//                releasesOnly()
-//            }
         }
-//        maven {
-//            name = "mavenCentralSnapshot"
-//            setUrl("https://s01.oss.sonatype.org/content/repositories/snapshots/")
-//            credentials {
-//                username = ossrhUsername
-//                password = ossrhPassword
-//            }
-//
-//            mavenContent {
-//                snapshotsOnly()
-//            }
-//        }
     }
 }
 
-signing {
-    sign(publishing.publications["lib"])
+kotlin {
+    jvm {
+        compilations.all {
+            val jvmTarget: String by rootProject
+
+            kotlinOptions.jvmTarget = jvmTarget
+        }
+        testRuns["test"].executionTask.configure {
+            useJUnitPlatform()
+        }
+    }
+    js(LEGACY) {
+        browser()
+        nodejs()
+    }
+
+    sourceSets {
+        val commonMain by getting {
+            dependencies {
+                val kotlinxDatetimeVersion: String by project
+
+                implementation("org.jetbrains.kotlinx:kotlinx-datetime:$kotlinxDatetimeVersion")
+
+                implementation("co.touchlab:stately-concurrency:1.1.7")
+                implementation("co.touchlab:stately-iso-collections:1.1.7-a1")
+            }
+        }
+        val commonTest by getting {
+            dependencies {
+                implementation(kotlin("test"))
+            }
+        }
+        val jvmMain by getting
+        val jvmTest by getting {
+            dependencies {
+                val junitVersion: String by project
+
+                implementation(kotlin("test-junit5"))
+                runtimeOnly("org.junit.jupiter:junit-jupiter-engine:$junitVersion")
+                compileOnly("org.junit.jupiter:junit-jupiter-api:$junitVersion")
+                compileOnly("org.junit.jupiter:junit-jupiter-params:$junitVersion")
+            }
+        }
+        val jsMain by getting
+        val jsTest by getting
+    }
+
+    publishing {
+        repositories {
+            maven {
+                val jfrogUsername: String by project
+                val jfrogPassword: String by project
+
+                setUrl("https://jadekim.jfrog.io/artifactory/maven/")
+
+                credentials {
+                    username = jfrogUsername
+                    password = jfrogPassword
+                }
+            }
+        }
+    }
+}
+
+tasks.named("publish") {
+    subprojects.forEach {
+        finalizedBy("${it.name}:publish")
+    }
 }
