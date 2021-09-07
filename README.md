@@ -1,15 +1,25 @@
 # j-logger
-[![Download](https://api.bintray.com/packages/jdekim43/maven/j-logger/images/download.svg)](https://bintray.com/jdekim43/maven/j-logger/_latestVersion)
-* Implemented slf4j-api
-* Support sync and async printer
-* Customizable print
-  * TextPrinter()
-  * GsonPrinter()
-  * JacksonPrinter()
-* Usable LogContext
+
+## Feature
+* Support Multiplatform
+  * Kotlin/JVM
+  * Java (Beta)
+  * JS (Alpha)
+* Contextual logging
   * GlobalLogContext
   * ThreadLogContext
   * CoroutineLogContext
+* Customizable log pipeline : (e.g. filtering, re-format, parallel processing)
+* Integration
+  * Coroutine
+  * Ktor (Only JVM - Dependent by ktor)
+  * Koin
+  * slf4j (Only JVM)
+  * OkHttp (Only JVM)
+  * Fuel (Only JVM)
+* Configuration option
+  * Code
+  * yaml or properties (TO-DO)
 
 ## Install
 ### Gradle Project
@@ -20,22 +30,15 @@
     implementation("kr.jadekim:j-logger:$jLoggerVersion")
     ```
 ## How to use
-### Configuration
-```
-JLog.addPrinter(TextPrinter())
-JLog.addAsyncPrinter(GsonPrinter())
-
-JLog.autoClassNamer() // JLog.addInterceptor(ClassLoggerAutoNamer(32))
-
-JLog.defaultLoggerLevel = Level.TRACE
-```
 ### Create logger
 ```
 val logger = JLog.get("loggerName")
+
+//In JVM
 val logger = JLog.get(A::class)
 val logger = JLog.get(A::class.java)
 ```
-### Logging
+### Log
 ```
 logger.trace("trace log", meta = mapOf())
 logger.debug("debug log", meta = mapOf())
@@ -49,16 +52,21 @@ try {
     logger.error("Occur Exception", throwable = e, meta = mapOf())
 }
 ```
-### Log with context
+### LogContext
+LogContext can upsert using plus operation.
 ```
+val logContext = LogContext(mapOf())
+val logContext = MutableLogContext(mutableMapOf())
+
 GlobalLogContext["globalContext"] = "global context"
 
 ThreadLogContext["threadLocalContext"] = "thread local context"
 
-val logContext = CoroutineLogContext().apply {
-    set("coroutineContext", "coroutine context")
-}
-withContext(logContext) {
+logger.info("info log") //LogContext = GlobalLogContext + ThreadLogContext
+logger.info("info log", context = logContext) //LogContext = GlobalLogContext + ThreadLogContext + logContext
+
+withContext(CoroutineLogContext() + logContext) {
+    //LogContext = GlobalLogContext + ThreadLogContext + CoroutineLogContext + logContext
     logger.sTrace("trace log", meta = mapOf())
     logger.sDebug("debug log", meta = mapOf())
     logger.sInfo("info log", meta = mapOf())
@@ -67,18 +75,18 @@ withContext(logContext) {
 }
 ```
 
-## Printers
-### TextPrinter
-Print logs in text type. `DefaultLogFormatter` does not print `logContext`, and `meta` converts using toString().
-#### Constructor Parameter
-* formatter: LogFormatter = DefaultLogFormatter
-* output: OutputStream = System.out
-* printStackTrace: Boolean = true
-### GsonPrinter & JacksonPrinter
-Print logs in json type. `GsonPrinter` and `JacksonPrinter` convert [Log class](https://github.com/jdekim43/j-logger/blob/master/src/main/kotlin/kr/jadekim/logger/model/Log.kt) using `Gson` or `Jackson`.
-#### Constructor Parameter
-* gson: Gson = Gson  //or mapper: ObjectMapper = jacksonObjectMapper()
-* output: OutputStream = System.out
-* printStackTrace: Boolean = true
-* traceMaxLength: Int = 12
-* useCustomDateSerializer: Boolean = false
+## Pipeline
+### Implement
+```
+class JLogExamplePipe : JLogPipe {
+    companion object Key : JLogPipe.Key<JLogExamplePipe>
+    
+    override val key = Key
+    
+    override fun handle(log: Log): Log? {
+        // if return null, the log will be filtered.
+        // Log is interface. So, We can return any type that implemented Log interface.
+        // But must be support return type to pipeline after this.
+    }
+}
+```
