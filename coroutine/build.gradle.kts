@@ -21,7 +21,7 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
-                implementation("$group:${rootProject.name}:$version")
+                implementation(project(":"))
 
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.1")
             }

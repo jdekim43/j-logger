@@ -5,7 +5,7 @@ plugins {
 }
 
 dependencies {
-    implementation("$group:${rootProject.name}:$version")
+    implementation(project(":"))
 
     implementation("org.slf4j:slf4j-api:1.7.30")
 }

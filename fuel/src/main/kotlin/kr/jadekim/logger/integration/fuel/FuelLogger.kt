@@ -11,7 +11,6 @@ import kr.jadekim.logger.JLogger
 import kr.jadekim.logger.LogLevel
 import kr.jadekim.logger.context.GlobalLogContext
 import kr.jadekim.logger.context.LogContext
-import kr.jadekim.logger.context.plus
 import kr.jadekim.logger.template.HttpRequestLog
 import kr.jadekim.logger.template.HttpResponseLog
 

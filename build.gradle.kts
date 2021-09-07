@@ -15,33 +15,6 @@ allprojects {
         mavenCentral()
         maven("https://jadekim.jfrog.io/artifactory/maven/")
     }
-
-    configurations.all {
-        resolutionStrategy {
-            failOnVersionConflict()
-            preferProjectModules()
-
-            dependencySubstitution {
-//                substitute(module("$group:${rootProject.name}")).using(project(":"))
-
-                all {
-                    (requested as? ModuleComponentSelector)?.let {
-                        if (it.group != rootProject.group) {
-                            return@let
-                        }
-
-                        val targetProject = if (it.module == rootProject.name) {
-                            rootProject
-                        } else {
-                            findProject(":${it.module}")
-                        } ?: return@let
-
-                        useTarget(targetProject)
-                    }
-                }
-            }
-        }
-    }
 }
 
 kotlin {

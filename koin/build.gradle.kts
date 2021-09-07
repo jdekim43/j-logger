@@ -21,7 +21,7 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
-                implementation("$group:${rootProject.name}:$version")
+                implementation(project(":"))
 
                 implementation("io.insert-koin:koin-core:3.1.2")
             }

@@ -5,7 +5,7 @@ plugins {
 }
 
 dependencies {
-    implementation("$group:${rootProject.name}:$version")
+    implementation(project(":"))
 
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.12.4")
 }

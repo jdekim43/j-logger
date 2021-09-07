@@ -5,7 +5,7 @@ plugins {
 }
 
 dependencies {
-    implementation("$group:${rootProject.name}:$version")
+    implementation(project(":"))
 
     implementation("com.google.code.gson:gson:2.8.6")
 }

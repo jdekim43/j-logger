@@ -19,10 +19,9 @@ kotlin {
             dependencies {
                 val kotlinxDatetimeVersion: String by project
 
-                implementation("$group:${rootProject.name}:$version")
-                implementation("$group:${rootProject.name}-coroutine:$version")
+                implementation(project(":"))
+                implementation(project(":${rootProject.name}-coroutine"))
 
-                implementation("io.ktor:ktor-server-core:1.6.2")
                 implementation("org.jetbrains.kotlinx:kotlinx-datetime:$kotlinxDatetimeVersion")
             }
         }
@@ -32,7 +31,11 @@ kotlin {
                 implementation(kotlin("test-annotations-common"))
             }
         }
-        val jvmMain by getting
+        val jvmMain by getting {
+            dependencies {
+                implementation("io.ktor:ktor-server-core:1.6.3")
+            }
+        }
         val jvmTest by getting {
             dependencies {
                 val junitVersion: String by project

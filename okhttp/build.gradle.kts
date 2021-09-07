@@ -7,7 +7,7 @@ plugins {
 dependencies {
     val kotlinxDatetimeVersion: String by project
 
-    implementation("$group:${rootProject.name}:$version")
+    implementation(project(":"))
 
     implementation("com.squareup.okhttp3:logging-interceptor:4.9.1")
     implementation("org.jetbrains.kotlinx:kotlinx-datetime:$kotlinxDatetimeVersion")

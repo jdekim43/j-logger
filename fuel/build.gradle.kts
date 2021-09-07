@@ -7,7 +7,7 @@ plugins {
 dependencies {
     val kotlinxDatetimeVersion: String by project
 
-    implementation("$group:${rootProject.name}:$version")
+    implementation(project(":"))
 
     implementation("com.github.kittinunf.fuel:fuel:2.3.1")
     implementation("org.jetbrains.kotlinx:kotlinx-datetime:$kotlinxDatetimeVersion")
