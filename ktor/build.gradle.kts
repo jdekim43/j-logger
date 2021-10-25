@@ -1,5 +1,6 @@
 plugins {
     kotlin("multiplatform")
+    id("org.jetbrains.dokka")
 }
 
 kotlin {
@@ -48,17 +49,36 @@ kotlin {
         }
     }
 
+    val dokkaHtml by tasks.getting(org.jetbrains.dokka.gradle.DokkaTask::class)
+    val javadocJar: TaskProvider<Jar> by tasks.registering(Jar::class) {
+        dependsOn(dokkaHtml)
+        archiveClassifier.set("javadoc")
+        from(dokkaHtml.outputDirectory)
+    }
+
     publishing {
-        repositories {
-            maven {
-                val jfrogUsername: String by project
-                val jfrogPassword: String by project
-
-                setUrl("https://jadekim.jfrog.io/artifactory/maven/")
-
-                credentials {
-                    username = jfrogUsername
-                    password = jfrogPassword
+        publications.withType<MavenPublication> {
+            artifact(javadocJar)
+            pom {
+                name.set(project.name)
+                description.set("Logging Library for Kotlin")
+                url.set("https://github.com/jdekim43/j-logger")
+                licenses {
+                    license {
+                        name.set("The Apache License, Version 2.0")
+                        url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
+                    }
+                }
+                developers {
+                    developer {
+                        id.set("jdekim43")
+                        name.set("Jade Kim")
+                    }
+                }
+                scm {
+                    connection.set("scm:git:git://github.com/jdekim43/j-logger.git")
+                    developerConnection.set("scm:git:git://github.com/jdekim43/j-logger.git")
+                    url.set("https://github.com/jdekim43/j-logger")
                 }
             }
         }

@@ -1,11 +1,14 @@
 plugins {
-    kotlin("multiplatform") version "1.5.21"
+    kotlin("multiplatform") version "1.5.30"
+    id("org.jetbrains.dokka") version "1.5.30"
     id("maven-publish")
+    id("signing")
 }
 
 allprojects {
     apply {
         plugin("maven-publish")
+        plugin("signing")
     }
 
     group = "kr.jadekim"
@@ -13,7 +16,37 @@ allprojects {
 
     repositories {
         mavenCentral()
-        maven("https://jadekim.jfrog.io/artifactory/maven/")
+    }
+
+    publishing {
+        repositories {
+            val ossrhUsername: String by project
+            val ossrhPassword: String by project
+
+            if (version.toString().endsWith("-SNAPSHOT", true)) {
+                maven {
+                    name = "mavenCentralSnapshot"
+                    setUrl("https://s01.oss.sonatype.org/content/repositories/snapshots/")
+                    credentials {
+                        username = ossrhUsername
+                        password = ossrhPassword
+                    }
+                }
+            } else {
+                maven {
+                    name = "mavenCentral"
+                    setUrl("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/")
+                    credentials {
+                        username = ossrhUsername
+                        password = ossrhPassword
+                    }
+                }
+            }
+        }
+    }
+
+    signing {
+        sign(publishing.publications)
     }
 }
 
@@ -64,17 +97,36 @@ kotlin {
         val jsTest by getting
     }
 
+    val dokkaHtml by tasks.getting(org.jetbrains.dokka.gradle.DokkaTask::class)
+    val javadocJar: TaskProvider<Jar> by tasks.registering(Jar::class) {
+        dependsOn(dokkaHtml)
+        archiveClassifier.set("javadoc")
+        from(dokkaHtml.outputDirectory)
+    }
+
     publishing {
-        repositories {
-            maven {
-                val jfrogUsername: String by project
-                val jfrogPassword: String by project
-
-                setUrl("https://jadekim.jfrog.io/artifactory/maven/")
-
-                credentials {
-                    username = jfrogUsername
-                    password = jfrogPassword
+        publications.withType<MavenPublication> {
+            artifact(javadocJar)
+            pom {
+                name.set(project.name)
+                description.set("Logging Library for Kotlin")
+                url.set("https://github.com/jdekim43/j-logger")
+                licenses {
+                    license {
+                        name.set("The Apache License, Version 2.0")
+                        url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
+                    }
+                }
+                developers {
+                    developer {
+                        id.set("jdekim43")
+                        name.set("Jade Kim")
+                    }
+                }
+                scm {
+                    connection.set("scm:git:git://github.com/jdekim43/j-logger.git")
+                    developerConnection.set("scm:git:git://github.com/jdekim43/j-logger.git")
+                    url.set("https://github.com/jdekim43/j-logger")
                 }
             }
         }

@@ -32,6 +32,13 @@ fun PipelineContext<Unit, ApplicationCall>.logWithoutBody() {
     context.attributes.put(REQUEST_LOG_BODY, false)
 }
 
+val HttpStatusCode.defaultLogLevel: LogLevel
+    get() = when(value / 100) {
+        5 -> LogLevel.ERROR
+        4 -> LogLevel.WARNING
+        else -> LogLevel.INFO
+    }
+
 class RequestLogger private constructor(
     private val logContext: ApplicationCall.(MutableLogContext) -> Unit,
     private val canLogBody: ApplicationCall.() -> Boolean,
@@ -43,7 +50,7 @@ class RequestLogger private constructor(
         var logContext: ApplicationCall.(MutableLogContext) -> Unit = {}
         var canLogBody: ApplicationCall.() -> Boolean = { false }
         var logger: JLogger = JLog.get("RequestLogger")
-        var logLevel: ApplicationCall.(Throwable?) -> LogLevel = { LogLevel.INFO }
+        var logLevel: ApplicationCall.(Throwable?) -> LogLevel = { response.status()?.defaultLogLevel ?: LogLevel.INFO }
     }
 
     companion object Feature : ApplicationFeature<Application, Configuration, RequestLogger> {

@@ -13,7 +13,7 @@ class JLogContext private constructor(
 ) {
 
     class Configuration {
-        val context: ApplicationCall.(MutableLogContext) -> Unit = {}
+        var context: ApplicationCall.(MutableLogContext) -> Unit = {}
     }
 
     companion object Feature : ApplicationFeature<Application, Configuration, JLogContext> {
