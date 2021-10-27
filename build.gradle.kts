@@ -1,67 +1,115 @@
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-
 plugins {
-    kotlin("jvm") version "1.4.21"
-    id("signing")
+    kotlin("multiplatform") version "1.5.30"
+    id("org.jetbrains.dokka") version "1.5.30"
     id("maven-publish")
+    id("signing")
 }
 
-val artifactName = "j-logger"
-val artifactGroup = "kr.jadekim"
-val artifactVersion = "1.1.2"
-group = artifactGroup
-version = artifactVersion
+allprojects {
+    apply {
+        plugin("maven-publish")
+        plugin("signing")
+    }
 
-repositories {
-    mavenCentral()
-    jcenter()
+    group = "kr.jadekim"
+    version = "2.0.0"
+
+    repositories {
+        mavenCentral()
+    }
+
+    publishing {
+        repositories {
+            val ossrhUsername: String by project
+            val ossrhPassword: String by project
+
+            if (version.toString().endsWith("-SNAPSHOT", true)) {
+                maven {
+                    name = "mavenCentralSnapshot"
+                    setUrl("https://s01.oss.sonatype.org/content/repositories/snapshots/")
+                    credentials {
+                        username = ossrhUsername
+                        password = ossrhPassword
+                    }
+                }
+            } else {
+                maven {
+                    name = "mavenCentral"
+                    setUrl("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/")
+                    credentials {
+                        username = ossrhUsername
+                        password = ossrhPassword
+                    }
+                }
+            }
+        }
+    }
+
+    signing {
+        sign(publishing.publications)
+    }
 }
 
-dependencies {
-    val kotlinxCoroutineVersion: String by project
-    val slf4jVersion: String by project
-    val jacksonVersion: String by project
-    val gsonVersion: String by project
-    val okHttpVersion: String by project
-    val fuelVersion: String by project
-    val koinVersion: String by project
-    val ktorVersion: String by project
+kotlin {
+    jvm {
+        compilations.all {
+            val jvmTarget: String by rootProject
 
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinxCoroutineVersion")
+            kotlinOptions.jvmTarget = jvmTarget
+        }
+        testRuns["test"].executionTask.configure {
+            useJUnitPlatform()
+        }
+    }
+    js(LEGACY) {
+        browser()
+        nodejs()
+    }
 
-    implementation("org.slf4j:slf4j-api:$slf4jVersion")
+    sourceSets {
+        val commonMain by getting {
+            dependencies {
+                val kotlinxDatetimeVersion: String by project
 
-    compileOnly("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion")
-    compileOnly("com.google.code.gson:gson:$gsonVersion")
+                implementation("org.jetbrains.kotlinx:kotlinx-datetime:$kotlinxDatetimeVersion")
 
-    compileOnly("com.squareup.okhttp3:logging-interceptor:$okHttpVersion")
-    compileOnly("com.github.kittinunf.fuel:fuel:$fuelVersion")
-    compileOnly("org.koin:koin-core:$koinVersion")
-    compileOnly("io.ktor:ktor-server-core:$ktorVersion")
-}
+                implementation("co.touchlab:stately-concurrency:1.1.7")
+                implementation("co.touchlab:stately-iso-collections:1.1.7-a1")
+            }
+        }
+        val commonTest by getting {
+            dependencies {
+                implementation(kotlin("test"))
+            }
+        }
+        val jvmMain by getting
+        val jvmTest by getting {
+            dependencies {
+                val junitVersion: String by project
 
-tasks.withType<KotlinCompile> {
-    val jvmTarget: String by project
+                implementation(kotlin("test-junit5"))
+                runtimeOnly("org.junit.jupiter:junit-jupiter-engine:$junitVersion")
+                compileOnly("org.junit.jupiter:junit-jupiter-api:$junitVersion")
+                compileOnly("org.junit.jupiter:junit-jupiter-params:$junitVersion")
+            }
+        }
+        val jsMain by getting
+        val jsTest by getting
+    }
 
-    kotlinOptions.jvmTarget = jvmTarget
-}
+    val dokkaHtml by tasks.getting(org.jetbrains.dokka.gradle.DokkaTask::class)
+    val javadocJar: TaskProvider<Jar> by tasks.registering(Jar::class) {
+        dependsOn(dokkaHtml)
+        archiveClassifier.set("javadoc")
+        from(dokkaHtml.outputDirectory)
+    }
 
-java {
-    withJavadocJar()
-    withSourcesJar()
-}
-
-publishing {
-    publications {
-        create<MavenPublication>("lib") {
-            groupId = artifactGroup
-            artifactId = artifactName
-            version = artifactVersion
-            from(components["java"])
-
+    publishing {
+        publications.withType<MavenPublication> {
+            artifact(javadocJar)
             pom {
-                name.set("j-logger")
-                description.set("Logging Library for kotlin.")
+                name.set(project.name)
+                description.set("Logging Library for Kotlin")
                 url.set("https://github.com/jdekim43/j-logger")
                 licenses {
                     license {
@@ -73,49 +121,20 @@ publishing {
                     developer {
                         id.set("jdekim43")
                         name.set("Jade Kim")
-                        email.set("jinyong@jadekim.kr")
                     }
                 }
                 scm {
-                    connection.set("scm:git:git://github.com/j-logger.git")
-                    developerConnection.set("scm:git:ssh://github.com/j-logger.git")
-                    url.set("https://github.com/jdekim43/j-logger.git")
+                    connection.set("scm:git:git://github.com/jdekim43/j-logger.git")
+                    developerConnection.set("scm:git:git://github.com/jdekim43/j-logger.git")
+                    url.set("https://github.com/jdekim43/j-logger")
                 }
             }
         }
     }
-
-    repositories {
-        val ossrhUsername: String by project
-        val ossrhPassword: String by project
-
-        maven {
-            name = "mavenCentral"
-            setUrl("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/")
-            credentials {
-                username = ossrhUsername
-                password = ossrhPassword
-            }
-
-//            mavenContent {
-//                releasesOnly()
-//            }
-        }
-//        maven {
-//            name = "mavenCentralSnapshot"
-//            setUrl("https://s01.oss.sonatype.org/content/repositories/snapshots/")
-//            credentials {
-//                username = ossrhUsername
-//                password = ossrhPassword
-//            }
-//
-//            mavenContent {
-//                snapshotsOnly()
-//            }
-//        }
-    }
 }
 
-signing {
-    sign(publishing.publications["lib"])
+tasks.named("publish") {
+    subprojects.forEach {
+        finalizedBy("${it.name}:publish")
+    }
 }
