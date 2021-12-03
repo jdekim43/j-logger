@@ -1,6 +1,6 @@
 package kr.jadekim.logger.context
 
-import co.touchlab.stately.collections.IsoMutableMap
+import co.touchlab.stately.collections.SharedHashMap
 import co.touchlab.stately.concurrency.ThreadLocalRef
 
 interface LogContext : Map<String, Any?> {
@@ -50,7 +50,12 @@ interface MutableLogContext : LogContext, MutableMap<String, Any?> {
 internal class MutableLogContextImpl(
     data: MutableMap<String, Any?>,
 ) : MutableLogContext,
-    MutableMap<String, Any?> by IsoMutableMap(producer = { data })
+    MutableMap<String, Any?> by SharedHashMap() {
+
+    init {
+        putAll(data)
+    }
+}
 
 fun MutableLogContext(data: MutableMap<String, Any?> = mutableMapOf()): MutableLogContext = MutableLogContextImpl(data)
 

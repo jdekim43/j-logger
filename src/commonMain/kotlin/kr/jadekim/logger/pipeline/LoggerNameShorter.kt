@@ -9,6 +9,14 @@ open class LoggerNameShorter(val preferLength: Int = 32) : JLogPipe {
 
     override val key = Key
 
+    override fun install(pipeline: MutableList<JLogPipe>, index: Int) {
+        if (pipeline.any { LoggerNameShorter::class.isInstance(it) }) {
+            return
+        }
+
+        super.install(pipeline, index)
+    }
+
     override fun handle(log: Log): Log {
         if (log is LogData) {
             return log.copy(loggerName = transform(log.loggerName))

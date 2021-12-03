@@ -1,6 +1,6 @@
 plugins {
-    kotlin("multiplatform") version "1.5.30"
-    id("org.jetbrains.dokka") version "1.5.30"
+    kotlin("multiplatform") version "1.6.0"
+    id("org.jetbrains.dokka") version "1.6.0"
     id("maven-publish")
     id("signing")
 }
@@ -12,7 +12,7 @@ allprojects {
     }
 
     group = "kr.jadekim"
-    version = "2.0.0"
+    version = "2.0.3-alpha1"
 
     repositories {
         mavenCentral()
@@ -73,8 +73,8 @@ kotlin {
 
                 implementation("org.jetbrains.kotlinx:kotlinx-datetime:$kotlinxDatetimeVersion")
 
-                implementation("co.touchlab:stately-concurrency:1.1.7")
-                implementation("co.touchlab:stately-iso-collections:1.1.7-a1")
+                implementation("co.touchlab:stately-concurrency:1.2.0")
+                implementation("co.touchlab:stately-collections:1.2.0")
             }
         }
         val commonTest by getting {

@@ -43,7 +43,7 @@ class JulLogger : Handler() {
                         "sequenceNumber" to record.sequenceNumber,
                     ),
                 ),
-                Instant.fromEpochMilliseconds(record.instant.toEpochMilli())
+                Instant.fromEpochMilliseconds(record.millis)
                     .toLocalDateTime(TimeZone.currentSystemDefault()),
             )
         )

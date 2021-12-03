@@ -22,7 +22,12 @@ java {
 }
 
 publishing {
-    publications.withType<MavenPublication> {
+    publications.create<MavenPublication>("lib") {
+        groupId = project.group.toString()
+        artifactId = project.name
+        version = project.version.toString()
+        from(components["java"])
+
         pom {
             name.set(project.name)
             description.set("Logging Library for Kotlin")

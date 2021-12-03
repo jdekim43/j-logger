@@ -1,6 +1,6 @@
 package kr.jadekim.logger
 
-import co.touchlab.stately.collections.IsoMutableMap
+import co.touchlab.stately.collections.SharedHashMap
 import kr.jadekim.logger.option.JLoggerOptionProvider
 import kr.jadekim.logger.pipeline.*
 
@@ -10,12 +10,13 @@ object JLog {
     var loggerLevel = LogLevel.INFO
     var pipeline: MutableList<JLogPipe> = mutableListOf(
         LoggerNameShorter(),
+        TextFormatter(),
         StdOutPrinter(),
     )
 
     var optionProvider = JLoggerOptionProvider.builder().build()
 
-    private val loggers = IsoMutableMap<String, JLogger>()
+    private val loggers = SharedHashMap<String, JLogger>()
 
     fun get(name: String): JLogger = loggers.getOrPut(name) {
         val option = optionProvider[name]

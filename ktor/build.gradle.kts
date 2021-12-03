@@ -34,7 +34,7 @@ kotlin {
         }
         val jvmMain by getting {
             dependencies {
-                implementation("io.ktor:ktor-server-core:1.6.3")
+                implementation("io.ktor:ktor-server-core:1.6.5")
             }
         }
         val jvmTest by getting {

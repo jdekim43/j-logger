@@ -4,13 +4,17 @@ import kr.jadekim.logger.Log
 
 class StdOutPrinter(
     val printStackTrace: Boolean = true,
-) : JLogPipe{
+) : JLogPipe {
 
     companion object Key : JLogPipe.Key<StdOutPrinter>
 
     override val key = Key
 
     override fun install(pipeline: MutableList<JLogPipe>, index: Int) {
+        if (pipeline.any { StdOutPrinter::class.isInstance(it) }) {
+            return
+        }
+
         pipeline.add(index, this)
 
         if (!pipeline.contains(TextFormatter)) {
