@@ -1,8 +1,8 @@
 package kr.jadekim.logger.integration.ktor
 
-import io.ktor.application.*
 import io.ktor.http.*
-import io.ktor.request.*
+import io.ktor.server.application.*
+import io.ktor.server.request.*
 import io.ktor.util.*
 import io.ktor.util.pipeline.*
 import kotlinx.coroutines.withContext
@@ -53,7 +53,9 @@ class RequestLogger private constructor(
         var logLevel: ApplicationCall.(Throwable?) -> LogLevel = { response.status()?.defaultLogLevel ?: LogLevel.INFO }
     }
 
-    companion object Feature : ApplicationFeature<Application, Configuration, RequestLogger> {
+    companion object Feature : BaseApplicationPlugin<Application, Configuration, RequestLogger> {
+
+        val phase = PipelinePhase("RequestLog")
 
         override val key: AttributeKey<RequestLogger> = AttributeKey("RequestLogger")
 
@@ -66,7 +68,9 @@ class RequestLogger private constructor(
                 configuration.logLevel,
             )
 
-            pipeline.intercept(ApplicationCallPipeline.Monitoring) {
+            pipeline.insertPhaseAfter(ApplicationCallPipeline.Monitoring, phase)
+
+            pipeline.intercept(phase) {
                 val logContext = coroutineContext[CoroutineLogContext] ?: CoroutineLogContext()
                 val meta = MutableLogContext()
 

@@ -9,10 +9,15 @@ import java.lang.reflect.Type
 import java.util.*
 
 class GsonFormatter(
-    gson: Gson = Gson(),
+    gson: Gson,
     var traceMaxLength: Int = 12,
     useCustomDateSerializer: Boolean = false,
 ) : JLogPipe {
+
+    constructor(
+        traceMaxLength: Int = 12,
+        useCustomDateSerializer: Boolean = false,
+    ) : this(Gson(), traceMaxLength, useCustomDateSerializer)
 
     companion object Key : JLogPipe.Key<GsonFormatter>
 
@@ -27,7 +32,7 @@ class GsonFormatter(
         }
         .create()
 
-    override fun handle(log: Log): Log = TextFormatter.FormattedLog(log, gson.toJson(log) + "\n")
+    override fun handle(log: Log): Log = TextFormatter.FormattedLog(log, gson.toJson(log))
 
     private inner class DateSerializer : JsonSerializer<Date> {
 

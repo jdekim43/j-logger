@@ -23,8 +23,6 @@ class TextFormatter(
             if (printMeta && log.meta.isNotEmpty()) {
                 log.meta.map { "${it.key}=${it.value}" }.joinTo(this, ", ", prefix = "(", postfix = ")")
             }
-
-            appendLine()
         }
 
         return FormattedLog(log, text)

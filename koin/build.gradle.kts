@@ -24,7 +24,7 @@ kotlin {
             dependencies {
                 implementation(project(":"))
 
-                implementation("io.insert-koin:koin-core:3.1.3")
+                implementation("io.insert-koin:koin-core:3.1.6")
             }
         }
         val commonTest by getting {

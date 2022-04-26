@@ -1,12 +1,12 @@
 package kr.jadekim.logger.integration.ktor
 
-import io.ktor.application.*
-import io.ktor.request.*
-import io.ktor.routing.*
+import io.ktor.server.application.*
+import io.ktor.server.request.*
+import io.ktor.server.routing.*
 import io.ktor.util.*
 import kotlinx.coroutines.withContext
-import kr.jadekim.logger.coroutine.context.CoroutineLogContext
 import kr.jadekim.logger.context.MutableLogContext
+import kr.jadekim.logger.coroutine.context.CoroutineLogContext
 
 class JLogContext private constructor(
     private val context: ApplicationCall.(MutableLogContext) -> Unit = {},
@@ -16,7 +16,7 @@ class JLogContext private constructor(
         var context: ApplicationCall.(MutableLogContext) -> Unit = {}
     }
 
-    companion object Feature : ApplicationFeature<Application, Configuration, JLogContext> {
+    companion object Feature : BaseApplicationPlugin<Application, Configuration, JLogContext> {
 
         override val key: AttributeKey<JLogContext> = AttributeKey("JLogContext")
 

@@ -39,7 +39,7 @@ class JacksonFormatter(
         }
     }
 
-    override fun handle(log: Log): Log = TextFormatter.FormattedLog(log, mapper.writeValueAsString(log) + "\n")
+    override fun handle(log: Log): Log = TextFormatter.FormattedLog(log, mapper.writeValueAsString(log))
 
     private inner class DateSerializer : JsonSerializer<Date>() {
 
@@ -60,12 +60,12 @@ class JacksonFormatter(
 
             val builder = StringBuilder()
 
-            builder.appendln(value.toString())
+            builder.appendLine(value.toString())
 
             value.stackTrace
                 .take(traceMaxLength)
                 .forEach {
-                    builder.appendln("\tat $it")
+                    builder.appendLine("\tat $it")
                 }
 
             gen.writeString(builder.toString())
