@@ -6,10 +6,13 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializerProvider
 import com.fasterxml.jackson.databind.module.SimpleModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toInstant
 import kr.jadekim.logger.Log
+import kr.jadekim.logger.SerializedLog
 import java.io.PrintWriter
 import java.io.StringWriter
-import java.util.*
 
 class JacksonFormatter(
     mapper: ObjectMapper = jacksonObjectMapper(),
@@ -22,7 +25,7 @@ class JacksonFormatter(
     override val key: JLogPipe.Key<out JLogPipe> = Key
 
     private val timestampModule = SimpleModule().apply {
-        addSerializer(Date::class.java, DateSerializer())
+        addSerializer(LocalDateTime::class.java, LocalDateTimeSerializer())
     }
 
     private val throwableModule = SimpleModule().apply {
@@ -39,12 +42,19 @@ class JacksonFormatter(
         }
     }
 
-    override fun handle(log: Log): Log = TextFormatter.FormattedLog(log, mapper.writeValueAsString(log))
+    override fun handle(log: Log): Log = SerializedLog.String(log, mapper.writeValueAsString(log))
 
-    private inner class DateSerializer : JsonSerializer<Date>() {
+    private inner class LocalDateTimeSerializer : JsonSerializer<LocalDateTime>() {
 
-        override fun serialize(value: Date?, gen: JsonGenerator, serializers: SerializerProvider) {
-            value?.let { gen.writeNumber(it.time) }
+        override fun serialize(value: LocalDateTime?, gen: JsonGenerator, serializers: SerializerProvider) {
+            if (value == null) {
+                gen.writeNull()
+                return
+            }
+
+            val timestamp = value.toInstant(TimeZone.currentSystemDefault()).toEpochMilliseconds()
+
+            gen.writeNumber(timestamp)
         }
     }
 

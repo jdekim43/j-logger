@@ -14,17 +14,17 @@ kotlin {
             useJUnitPlatform()
         }
     }
-    js(LEGACY) {
-        browser()
-        nodejs()
-    }
+//    js(LEGACY) {
+//        browser()
+//        nodejs()
+//    }
 
     sourceSets {
         val commonMain by getting {
             dependencies {
                 implementation(project(":"))
 
-                implementation("io.insert-koin:koin-core:3.1.6")
+                implementation("io.insert-koin:koin-core:3.2.2")
             }
         }
         val commonTest by getting {
@@ -43,8 +43,8 @@ kotlin {
                 compileOnly("org.junit.jupiter:junit-jupiter-params:$junitVersion")
             }
         }
-        val jsMain by getting
-        val jsTest by getting
+//        val jsMain by getting
+//        val jsTest by getting
     }
 
     val dokkaHtml by tasks.getting(org.jetbrains.dokka.gradle.DokkaTask::class)

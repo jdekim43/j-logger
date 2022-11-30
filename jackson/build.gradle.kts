@@ -5,12 +5,15 @@ plugins {
 }
 
 dependencies {
+    val kotlinxDatetimeVersion: String by project
+
     implementation(project(":"))
 
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.13.2") {
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.14.1") {
         exclude("com.fasterxml.jackson.core", "jackson-databind")
     }
-    implementation("com.fasterxml.jackson.core:jackson-databind:2.13.2.2")
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.14.1")
+    implementation("org.jetbrains.kotlinx:kotlinx-datetime:$kotlinxDatetimeVersion")
 }
 
 tasks.withType<KotlinCompile> {

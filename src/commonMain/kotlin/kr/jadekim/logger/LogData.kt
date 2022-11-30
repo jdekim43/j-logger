@@ -28,3 +28,10 @@ data class LogData(
     override val context: LogContext = EmptyLogContext,
     override val timestamp: LocalDateTime = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()),
 ) : Log
+
+sealed class SerializedLog<T>(log: Log, val data: T) : Log by log {
+
+    class String(log: Log, data: kotlin.String) : SerializedLog<kotlin.String>(log, data)
+
+    class ByteArray(log: Log, data: kotlin.ByteArray) : SerializedLog<kotlin.ByteArray>(log, data)
+}

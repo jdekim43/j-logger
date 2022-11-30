@@ -1,8 +1,9 @@
 package kr.jadekim.logger.pipeline
 
 import kr.jadekim.logger.Log
+import kr.jadekim.logger.SerializedLog
 
-class TextFormatter(
+open class TextFormatter(
     var printMeta: Boolean = true,
 ) : JLogPipe {
 
@@ -10,7 +11,7 @@ class TextFormatter(
 
     override val key = Key
 
-    override fun handle(log: Log): Log {
+    override fun handle(log: Log): SerializedLog.String {
         val text = buildString {
             append(log.timestamp.toString().padEnd(23))
             append(' ')
@@ -25,8 +26,6 @@ class TextFormatter(
             }
         }
 
-        return FormattedLog(log, text)
+        return SerializedLog.String(log, text)
     }
-
-    data class FormattedLog(val log: Log, val formattedText: String) : Log by log
 }

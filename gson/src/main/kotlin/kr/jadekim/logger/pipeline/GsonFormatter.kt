@@ -1,12 +1,14 @@
 package kr.jadekim.logger.pipeline
 
 import com.google.gson.*
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toInstant
 import kr.jadekim.logger.Log
-import java.io.OutputStream
+import kr.jadekim.logger.SerializedLog
 import java.io.PrintWriter
 import java.io.StringWriter
 import java.lang.reflect.Type
-import java.util.*
 
 class GsonFormatter(
     gson: Gson,
@@ -27,17 +29,23 @@ class GsonFormatter(
         .registerTypeHierarchyAdapter(Throwable::class.java, ThrowableSerializer())
         .apply {
             if (!useCustomDateSerializer) {
-                registerTypeAdapter(Date::class.java, DateSerializer())
+                registerTypeAdapter(LocalDateTime::class.java, LocalDateTimeSerializer())
             }
         }
         .create()
 
-    override fun handle(log: Log): Log = TextFormatter.FormattedLog(log, gson.toJson(log))
+    override fun handle(log: Log): Log = SerializedLog.String(log, gson.toJson(log))
 
-    private inner class DateSerializer : JsonSerializer<Date> {
+    private inner class LocalDateTimeSerializer : JsonSerializer<LocalDateTime> {
 
-        override fun serialize(src: Date?, typeOfSrc: Type, context: JsonSerializationContext): JsonElement {
-            return src?.let { JsonPrimitive(it.time) } ?: JsonNull.INSTANCE
+        override fun serialize(src: LocalDateTime?, typeOfSrc: Type, context: JsonSerializationContext): JsonElement {
+            if (src == null) {
+                return JsonNull.INSTANCE
+            }
+
+            val timestamp = src.toInstant(TimeZone.currentSystemDefault()).toEpochMilliseconds()
+
+            return JsonPrimitive(timestamp)
         }
     }
 

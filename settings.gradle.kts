@@ -6,7 +6,6 @@ fun use(name: String) {
 }
 
 use("coroutine")
-use("fuel")
 use("gson")
 use("jackson")
 use("koin")

@@ -5,9 +5,12 @@ plugins {
 }
 
 dependencies {
+    val kotlinxDatetimeVersion: String by project
+
     implementation(project(":"))
 
-    implementation("com.google.code.gson:gson:2.9.0")
+    implementation("com.google.code.gson:gson:2.10")
+    implementation("org.jetbrains.kotlinx:kotlinx-datetime:$kotlinxDatetimeVersion")
 }
 
 tasks.withType<KotlinCompile> {

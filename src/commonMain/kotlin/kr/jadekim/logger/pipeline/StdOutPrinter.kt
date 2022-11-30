@@ -1,6 +1,7 @@
 package kr.jadekim.logger.pipeline
 
 import kr.jadekim.logger.Log
+import kr.jadekim.logger.SerializedLog
 
 class StdOutPrinter(
     val printStackTrace: Boolean = true,
@@ -16,15 +17,15 @@ class StdOutPrinter(
         }
 
         pipeline.add(index, this)
-
-        if (!pipeline.contains(TextFormatter)) {
-            pipeline.add(index, TextFormatter())
-        }
     }
 
     override fun handle(log: Log): Log {
-        if (log is TextFormatter.FormattedLog) {
-            println(log.formattedText)
+        when (log) {
+            is SerializedLog.String -> println(log.data)
+            else -> println("ERROR: StdOutPrinter is only acceptable SerializedLog.String. Require to install TextFormatter")
+        }
+
+        if (printStackTrace) {
             log.throwable?.printStackTrace()
         }
 
