@@ -14,6 +14,7 @@ interface Log {
     val throwable: Throwable?
     val meta: Map<String, Any?>
     val context: LogContext
+    val threadName: String?
     val timestamp: LocalDateTime
 
     fun isPrintable(level: LogLevel) = this.level.isPrintableAt(level)
@@ -26,6 +27,7 @@ data class LogData(
     override val throwable: Throwable? = null,
     override val meta: Map<String, Any?> = emptyMap(),
     override val context: LogContext = EmptyLogContext,
+    override val threadName: String? = getThreadName(),
     override val timestamp: LocalDateTime = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()),
 ) : Log
 
@@ -36,3 +38,5 @@ sealed class SerializedLog<T>(log: Log, val data: T) : Log by log {
     @Suppress("unused")
     class ByteArray(log: Log, data: kotlin.ByteArray) : SerializedLog<kotlin.ByteArray>(log, data)
 }
+
+internal expect fun getThreadName(): String?
