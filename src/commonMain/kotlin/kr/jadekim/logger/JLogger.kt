@@ -6,6 +6,7 @@ import kr.jadekim.logger.context.ThreadLogContext
 import kr.jadekim.logger.pipeline.JLogPipe
 import kr.jadekim.logger.pipeline.handle
 
+@Suppress("unused")
 open class JLogger(
     val name: String,
     var level: LogLevel,
@@ -31,7 +32,7 @@ open class JLogger(
     }
 
     fun log(level: LogLevel, log: LogExtra.() -> String) {
-        if (!level.isPrintable(this.level)) {
+        if (!level.isPrintableAt(this.level)) {
             return
         }
 

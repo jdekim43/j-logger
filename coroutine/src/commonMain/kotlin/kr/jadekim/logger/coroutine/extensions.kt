@@ -1,3 +1,5 @@
+@file:Suppress("unused")
+
 package kr.jadekim.logger.coroutine
 
 import kr.jadekim.logger.JLogger
@@ -25,7 +27,7 @@ suspend fun JLogger.sLog(
 }
 
 suspend fun JLogger.sLog(level: LogLevel, log: LogExtra.() -> String) {
-    if (!level.isPrintable(this.level)) {
+    if (!level.isPrintableAt(this.level)) {
         return
     }
 

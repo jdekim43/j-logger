@@ -16,7 +16,7 @@ interface Log {
     val context: LogContext
     val timestamp: LocalDateTime
 
-    fun isPrintable(level: LogLevel) = this.level.isPrintable(level)
+    fun isPrintable(level: LogLevel) = this.level.isPrintableAt(level)
 }
 
 data class LogData(
@@ -33,5 +33,6 @@ sealed class SerializedLog<T>(log: Log, val data: T) : Log by log {
 
     class String(log: Log, data: kotlin.String) : SerializedLog<kotlin.String>(log, data)
 
+    @Suppress("unused")
     class ByteArray(log: Log, data: kotlin.ByteArray) : SerializedLog<kotlin.ByteArray>(log, data)
 }

@@ -9,5 +9,5 @@ enum class LogLevel {
     DEBUG,
     TRACE;
 
-    fun isPrintable(level: LogLevel) = ordinal <= level.ordinal
+    fun isPrintableAt(level: LogLevel) = ordinal <= level.ordinal
 }
