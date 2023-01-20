@@ -4,7 +4,7 @@ import kr.jadekim.logger.context.ThreadLogContext
 import org.slf4j.spi.MDCAdapter
 import java.util.*
 
-class MdcAdapterImpl : MDCAdapter {
+class JLoggerMdcAdapter : MDCAdapter {
 
     override fun clear() = ThreadLogContext.clear()
 

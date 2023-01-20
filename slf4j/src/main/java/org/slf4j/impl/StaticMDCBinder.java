@@ -1,6 +1,6 @@
 package org.slf4j.impl;
 
-import kr.jadekim.logger.integration.slf4j.MdcAdapterImpl;
+import kr.jadekim.logger.integration.slf4j.JLoggerMdcAdapter;
 import org.slf4j.spi.MDCAdapter;
 
 public class StaticMDCBinder {
@@ -11,10 +11,10 @@ public class StaticMDCBinder {
     }
 
     public MDCAdapter getMDCA() {
-        return new MdcAdapterImpl();
+        return new JLoggerMdcAdapter();
     }
 
     public String getMDCAdapterClassStr() {
-        return MdcAdapterImpl.class.getName();
+        return JLoggerMdcAdapter.class.getName();
     }
 }
