@@ -4,6 +4,8 @@ import co.touchlab.stately.collections.SharedHashMap
 import kr.jadekim.logger.option.JLoggerOptionProvider
 import kr.jadekim.logger.pipeline.*
 
+internal expect fun init()
+
 @Suppress("VARIABLE_IN_SINGLETON_WITHOUT_THREAD_LOCAL")
 object JLog {
 
@@ -17,6 +19,10 @@ object JLog {
     var optionProvider = JLoggerOptionProvider.builder().build()
 
     private val loggers = SharedHashMap<String, JLogger>()
+
+    init {
+        init()
+    }
 
     fun get(name: String): JLogger = loggers.getOrPut(name) {
         val option = optionProvider[name]

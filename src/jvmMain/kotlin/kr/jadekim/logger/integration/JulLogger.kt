@@ -9,9 +9,43 @@ import kr.jadekim.logger.LogLevel
 import kr.jadekim.logger.context.LogContext
 import java.util.logging.Handler
 import java.util.logging.Level
+import java.util.logging.LogManager
 import java.util.logging.LogRecord
 
 class JulLogger : Handler() {
+
+    companion object {
+
+        @JvmStatic
+        private fun getRootLogger(): java.util.logging.Logger {
+            return LogManager.getLogManager().getLogger("")
+        }
+        @JvmStatic
+        fun install() {
+            LogManager.getLogManager().getLogger("").addHandler(JulLogger())
+        }
+
+        @JvmStatic
+        @Throws(SecurityException::class)
+        fun uninstall() {
+            val rootLogger = getRootLogger()
+            rootLogger.handlers
+                .filterIsInstance<JulLogger>()
+                .forEach { rootLogger.removeHandler(it) }
+        }
+
+        @JvmStatic
+        fun isInstalled(): Boolean {
+            return getRootLogger().handlers.any { it is JulLogger }
+        }
+
+        @JvmStatic
+        fun removeHandlersForRootLogger() {
+            val rootLogger = getRootLogger()
+
+            rootLogger.handlers.forEach { rootLogger.removeHandler(it) }
+        }
+    }
 
     private val logger = JLog.get("JulLogger")
 
@@ -28,6 +62,8 @@ class JulLogger : Handler() {
 
     override fun publish(record: LogRecord?) {
         val level = record?.level?.jlogLevel ?: return
+        val threadName = Thread.getAllStackTraces().asIterable().find { it.key.id == record.threadID.toLong() }?.key?.name
+
         logger.log(
             LogData(
                 record.loggerName,
@@ -43,6 +79,7 @@ class JulLogger : Handler() {
                         "sequenceNumber" to record.sequenceNumber,
                     ),
                 ),
+                threadName,
                 Instant.fromEpochMilliseconds(record.millis)
                     .toLocalDateTime(TimeZone.currentSystemDefault()),
             )
