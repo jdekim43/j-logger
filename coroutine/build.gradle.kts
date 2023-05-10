@@ -24,7 +24,7 @@ kotlin {
             dependencies {
                 implementation(project(":"))
 
-                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.0")
             }
         }
         val commonTest by getting {

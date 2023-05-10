@@ -27,8 +27,8 @@ class SentryPrinter : JLogPipe {
                 params = log.meta.map { "${it.key} - ${it.value}" }
             }
             throwable = log.throwable
-            contexts.putAll(log.context)
-            log.meta.forEach { (key, value) -> if (value != null) setExtra(key, value) }
+            contexts.putAll(log.context.filterValues { it != null })
+            log.meta.filterValues { it != null }.forEach { (key, value) -> if (value != null) setExtra(key, value) }
         }
 
         Sentry.captureEvent(event)

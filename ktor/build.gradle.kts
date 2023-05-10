@@ -23,7 +23,7 @@ kotlin {
                 implementation(project(":"))
                 implementation(project(":${rootProject.name}-coroutine"))
 
-                implementation("io.ktor:ktor-server-core:2.1.3")
+                implementation("io.ktor:ktor-server-core:2.3.0")
                 implementation("org.jetbrains.kotlinx:kotlinx-datetime:$kotlinxDatetimeVersion")
             }
         }

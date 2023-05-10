@@ -7,8 +7,8 @@ plugins {
 dependencies {
     implementation(project(":"))
 
-    implementation("io.sentry:sentry:6.12.1")
-    implementation("io.sentry:sentry-kotlin-extensions:6.12.1")
+    implementation("io.sentry:sentry:6.18.1")
+    implementation("io.sentry:sentry-kotlin-extensions:6.18.1")
 }
 
 tasks.withType<KotlinCompile> {

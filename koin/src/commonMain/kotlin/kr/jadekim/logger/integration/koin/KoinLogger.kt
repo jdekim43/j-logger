@@ -9,10 +9,11 @@ class KoinLogger : Logger(Level.DEBUG){
 
     private val logger = JLog.get("Koin")
 
-    override fun log(level: Level, msg: MESSAGE) {
+    override fun display(level: Level, msg: MESSAGE) {
         when(level) {
             Level.DEBUG -> logger.debug(msg)
             Level.INFO -> logger.info(msg)
+            Level.WARNING -> logger.warning(msg)
             Level.ERROR -> logger.error(msg)
             Level.NONE -> {
                 //do nothing

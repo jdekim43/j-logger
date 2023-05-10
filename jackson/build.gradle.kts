@@ -9,10 +9,10 @@ dependencies {
 
     implementation(project(":"))
 
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.14.1") {
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.15.0") {
         exclude("com.fasterxml.jackson.core", "jackson-databind")
     }
-    implementation("com.fasterxml.jackson.core:jackson-databind:2.14.1")
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.15.0")
     implementation("org.jetbrains.kotlinx:kotlinx-datetime:$kotlinxDatetimeVersion")
 }
 
