@@ -6,9 +6,12 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toInstant
 import kr.jadekim.logger.Log
 import kr.jadekim.logger.SerializedLog
+import kr.jadekim.logger.ThrowableObjectLog
 import java.io.PrintWriter
 import java.io.StringWriter
 import java.lang.reflect.Type
+import kotlin.reflect.KVisibility
+import kotlin.reflect.full.memberProperties
 
 class GsonFormatter(
     gson: Gson,
@@ -27,6 +30,7 @@ class GsonFormatter(
 
     private val gson = gson.newBuilder()
         .registerTypeHierarchyAdapter(Throwable::class.java, ThrowableSerializer())
+        .registerTypeAdapter(ThrowableObjectLog::class.java, ThrowableObjectLogSerializer())
         .apply {
             if (!useCustomDateSerializer) {
                 registerTypeAdapter(LocalDateTime::class.java, LocalDateTimeSerializer())
@@ -69,6 +73,25 @@ class GsonFormatter(
                 }
 
             return JsonPrimitive(builder.toString())
+        }
+    }
+
+    private inner class ThrowableObjectLogSerializer : JsonSerializer<ThrowableObjectLog> {
+
+        override fun serialize(
+            src: ThrowableObjectLog,
+            typeOfSrc: Type,
+            context: JsonSerializationContext,
+        ): JsonElement {
+            if (src.throwable == null) {
+                return JsonNull.INSTANCE
+            }
+
+            val fields = src.throwable!!::class.memberProperties
+                .filter { it.visibility == KVisibility.PUBLIC && !it.isSuspend && it.name == "cause" }
+                .associate { it.name to it.call(src.throwable) }
+
+            return context.serialize(fields)
         }
     }
 }

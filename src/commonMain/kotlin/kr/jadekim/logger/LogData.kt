@@ -40,3 +40,7 @@ sealed class SerializedLog<T>(log: Log, val data: T) : Log by log {
 }
 
 internal expect fun getThreadName(): String?
+
+class ThrowableObjectLog(val throwable: Throwable?)
+
+fun Throwable?.objectLog() = ThrowableObjectLog(this)

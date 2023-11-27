@@ -11,8 +11,12 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toInstant
 import kr.jadekim.logger.Log
 import kr.jadekim.logger.SerializedLog
+import kr.jadekim.logger.ThrowableObjectLog
 import java.io.PrintWriter
 import java.io.StringWriter
+import kotlin.reflect.KVisibility
+import kotlin.reflect.full.memberProperties
+import kotlin.reflect.jvm.isAccessible
 
 class JacksonFormatter(
     mapper: ObjectMapper = jacksonObjectMapper(),
@@ -79,6 +83,22 @@ class JacksonFormatter(
                 }
 
             gen.writeString(builder.toString())
+        }
+    }
+
+    private inner class ThrowableFieldLogSerializer : JsonSerializer<ThrowableObjectLog>() {
+
+        override fun serialize(value: ThrowableObjectLog, gen: JsonGenerator, serializers: SerializerProvider) {
+            if (value.throwable == null) {
+                gen.writeNull()
+                return
+            }
+
+            val fields = value.throwable!!::class.memberProperties
+                .filter { it.visibility == KVisibility.PUBLIC && !it.isSuspend && !it.isLateinit && it.isAccessible }
+                .associate { it.name to it.call(value.throwable) }
+
+            gen.writeObject(fields)
         }
     }
 }

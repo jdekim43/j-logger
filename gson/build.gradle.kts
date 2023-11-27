@@ -7,6 +7,8 @@ plugins {
 dependencies {
     val kotlinxDatetimeVersion: String by project
 
+    implementation(kotlin("reflect"))
+
     implementation(project(":"))
 
     implementation("com.google.code.gson:gson:2.10.1")
