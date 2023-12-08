@@ -12,7 +12,7 @@ allprojects {
     }
 
     group = "kr.jadekim"
-    version = "2.0.8"
+    version = "2.0.10"
 
     repositories {
         mavenCentral()

@@ -31,7 +31,7 @@ class JLogContext private constructor(
             }
 
             pipeline.intercept(ApplicationCallPipeline.Setup) {
-                val logContext = coroutineContext[CoroutineLogContext] ?: CoroutineLogContext()
+                val logContext = CoroutineLogContext.get()
 
                 logContext["remoteAddress"] = context.request.host()
                 logContext["userAgent"] = context.request.userAgent()

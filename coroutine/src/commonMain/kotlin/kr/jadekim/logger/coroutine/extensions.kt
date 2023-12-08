@@ -2,12 +2,12 @@
 
 package kr.jadekim.logger.coroutine
 
+import kotlinx.coroutines.withContext
 import kr.jadekim.logger.JLogger
 import kr.jadekim.logger.LogExtra
 import kr.jadekim.logger.LogLevel
 import kr.jadekim.logger.context.LogContext
 import kr.jadekim.logger.coroutine.context.CoroutineLogContext
-import kotlin.coroutines.coroutineContext
 
 suspend fun JLogger.sLog(
     level: LogLevel,
@@ -16,14 +16,9 @@ suspend fun JLogger.sLog(
     meta: Map<String, Any?> = emptyMap(),
     context: LogContext? = null,
 ) {
-    val coroutineLogContext = coroutineContext[CoroutineLogContext]?.snap()
-    val logContext = if (coroutineLogContext == null) {
-        context
-    } else {
-        coroutineLogContext + context
-    }
+    val coroutineLogContext = CoroutineLogContext.get().snap()
 
-    log(level, message, throwable, meta, logContext)
+    log(level, message, throwable, meta, coroutineLogContext + context)
 }
 
 suspend fun JLogger.sLog(level: LogLevel, log: LogExtra.() -> String) {
@@ -83,4 +78,16 @@ suspend fun JLogger.sTrace(message: String, throwable: Throwable? = null, meta: 
 
 suspend fun JLogger.sTrace(body: LogExtra.() -> String) {
     sLog(LogLevel.TRACE, body)
+}
+
+suspend fun <T> withLogContext(context: Map<String, Any?>? = null, body: suspend () -> T): T {
+    val logContext = CoroutineLogContext.get()
+
+    if (context != null) {
+        logContext.putAll(context)
+    }
+
+    return withContext(logContext) {
+        body()
+    }
 }

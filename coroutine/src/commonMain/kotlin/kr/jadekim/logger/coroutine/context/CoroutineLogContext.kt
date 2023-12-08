@@ -14,6 +14,6 @@ class CoroutineLogContext(
     companion object Key : CoroutineContext.Key<CoroutineLogContext> {
 
         @JvmStatic
-        suspend fun get(): MutableLogContext = coroutineContext[CoroutineLogContext] ?: ThreadLogContext
+        suspend fun get(): CoroutineLogContext = coroutineContext[CoroutineLogContext] ?: CoroutineLogContext(ThreadLogContext)
     }
 }

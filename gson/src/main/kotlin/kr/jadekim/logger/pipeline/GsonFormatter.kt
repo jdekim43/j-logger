@@ -88,7 +88,7 @@ class GsonFormatter(
             }
 
             val fields = src.throwable!!::class.memberProperties
-                .filter { it.visibility == KVisibility.PUBLIC && !it.isSuspend && it.name == "cause" }
+                .filter { it.visibility == KVisibility.PUBLIC && !it.isSuspend && it.name != "cause" }
                 .associate { it.name to it.call(src.throwable) }
 
             return context.serialize(fields)

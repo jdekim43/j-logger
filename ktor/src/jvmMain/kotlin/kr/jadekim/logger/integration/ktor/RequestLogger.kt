@@ -12,10 +12,10 @@ import kotlinx.datetime.toLocalDateTime
 import kr.jadekim.logger.JLog
 import kr.jadekim.logger.JLogger
 import kr.jadekim.logger.LogLevel
-import kr.jadekim.logger.coroutine.context.CoroutineLogContext
 import kr.jadekim.logger.context.MutableLogContext
-import kr.jadekim.logger.integration.ktor.JLogContext.Feature.ATTRIBUTE_ROUTE
+import kr.jadekim.logger.coroutine.context.CoroutineLogContext
 import kr.jadekim.logger.coroutine.sLog
+import kr.jadekim.logger.integration.ktor.JLogContext.Feature.ATTRIBUTE_ROUTE
 
 val REQUEST_LOG_ENABLE = AttributeKey<Boolean>("requestLog.enable")
 val REQUEST_LOG_BODY = AttributeKey<Boolean>("requestLog.printBody")
@@ -71,7 +71,7 @@ class RequestLogger private constructor(
             pipeline.insertPhaseAfter(ApplicationCallPipeline.Monitoring, phase)
 
             pipeline.intercept(phase) {
-                val logContext = coroutineContext[CoroutineLogContext] ?: CoroutineLogContext()
+                val logContext = CoroutineLogContext.get()
                 val meta = MutableLogContext()
 
                 val preHandleTime = Clock.System.now()
