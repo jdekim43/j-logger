@@ -4,12 +4,9 @@ plugins {
 }
 
 kotlin {
-    jvm {
-        compilations.all {
-            val jvmTarget: String by rootProject
+    jvmToolchain(8)
 
-            kotlinOptions.jvmTarget = jvmTarget
-        }
+    jvm {
         testRuns["test"].executionTask.configure {
             useJUnitPlatform()
         }
@@ -24,7 +21,7 @@ kotlin {
             dependencies {
                 implementation(project(":"))
 
-                implementation("io.insert-koin:koin-core:3.4.0")
+                implementation("io.insert-koin:koin-core:4.0.4")
             }
         }
         val commonTest by getting {

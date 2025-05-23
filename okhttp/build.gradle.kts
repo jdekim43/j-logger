@@ -1,5 +1,3 @@
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-
 plugins {
     kotlin("jvm")
 }
@@ -9,14 +7,12 @@ dependencies {
 
     implementation(project(":"))
 
-    implementation("com.squareup.okhttp3:logging-interceptor:4.11.0")
+    implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
     implementation("org.jetbrains.kotlinx:kotlinx-datetime:$kotlinxDatetimeVersion")
 }
 
-tasks.withType<KotlinCompile> {
-    val jvmTarget: String by rootProject
-
-    kotlinOptions.jvmTarget = jvmTarget
+kotlin {
+    jvmToolchain(8)
 }
 
 java {

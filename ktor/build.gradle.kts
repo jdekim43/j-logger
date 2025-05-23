@@ -4,12 +4,9 @@ plugins {
 }
 
 kotlin {
-    jvm {
-        compilations.all {
-            val jvmTarget: String by rootProject
+    jvmToolchain(8)
 
-            kotlinOptions.jvmTarget = jvmTarget
-        }
+    jvm {
         testRuns["test"].executionTask.configure {
             useJUnitPlatform()
         }
@@ -23,7 +20,7 @@ kotlin {
                 implementation(project(":"))
                 implementation(project(":${rootProject.name}-coroutine"))
 
-                implementation("io.ktor:ktor-server-core:2.3.0")
+                implementation("io.ktor:ktor-server-core:3.1.3")
                 implementation("org.jetbrains.kotlinx:kotlinx-datetime:$kotlinxDatetimeVersion")
             }
         }

@@ -4,12 +4,9 @@ plugins {
 }
 
 kotlin {
-    jvm {
-        compilations.all {
-            val jvmTarget: String by rootProject
+    jvmToolchain(8)
 
-            kotlinOptions.jvmTarget = jvmTarget
-        }
+    jvm {
         testRuns["test"].executionTask.configure {
             useJUnitPlatform()
         }
@@ -24,7 +21,7 @@ kotlin {
             dependencies {
                 implementation(project(":"))
 
-                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.0")
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
             }
         }
         val commonTest by getting {

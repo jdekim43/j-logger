@@ -81,10 +81,10 @@ suspend fun JLogger.sTrace(body: LogExtra.() -> String) {
 }
 
 suspend fun <T> withLogContext(context: Map<String, Any?>? = null, body: suspend () -> T): T {
-    val logContext = CoroutineLogContext.get()
+    var logContext = CoroutineLogContext.get()
 
     if (context != null) {
-        logContext.putAll(context)
+        logContext = CoroutineLogContext(logContext.snap() + LogContext(context))
     }
 
     return withContext(logContext) {

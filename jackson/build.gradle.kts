@@ -1,5 +1,3 @@
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-
 plugins {
     kotlin("jvm")
 }
@@ -9,17 +7,15 @@ dependencies {
 
     implementation(project(":"))
 
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.15.0") {
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.19.0") {
         exclude("com.fasterxml.jackson.core", "jackson-databind")
     }
-    implementation("com.fasterxml.jackson.core:jackson-databind:2.15.0")
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.19.0")
     implementation("org.jetbrains.kotlinx:kotlinx-datetime:$kotlinxDatetimeVersion")
 }
 
-tasks.withType<KotlinCompile> {
-    val jvmTarget: String by rootProject
-
-    kotlinOptions.jvmTarget = jvmTarget
+kotlin {
+    jvmToolchain(8)
 }
 
 java {

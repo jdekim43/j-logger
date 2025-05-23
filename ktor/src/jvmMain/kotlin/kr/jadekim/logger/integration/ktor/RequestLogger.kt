@@ -3,6 +3,7 @@ package kr.jadekim.logger.integration.ktor
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*
+import io.ktor.server.routing.*
 import io.ktor.util.*
 import io.ktor.util.pipeline.*
 import kotlinx.coroutines.withContext
@@ -15,108 +16,100 @@ import kr.jadekim.logger.LogLevel
 import kr.jadekim.logger.context.MutableLogContext
 import kr.jadekim.logger.coroutine.context.CoroutineLogContext
 import kr.jadekim.logger.coroutine.sLog
-import kr.jadekim.logger.integration.ktor.JLogContext.Feature.ATTRIBUTE_ROUTE
+import kotlin.coroutines.CoroutineContext
 
 val REQUEST_LOG_ENABLE = AttributeKey<Boolean>("requestLog.enable")
 val REQUEST_LOG_BODY = AttributeKey<Boolean>("requestLog.printBody")
 
-fun PipelineContext<Unit, ApplicationCall>.disableRequestLog() {
-    context.attributes.put(REQUEST_LOG_ENABLE, false)
+fun RoutingContext.disableRequestLog() {
+    call.attributes.put(REQUEST_LOG_ENABLE, false)
 }
 
-fun PipelineContext<Unit, ApplicationCall>.logWithBody() {
-    context.attributes.put(REQUEST_LOG_BODY, true)
+fun RoutingContext.logWithBody() {
+    call.attributes.put(REQUEST_LOG_BODY, true)
 }
 
-fun PipelineContext<Unit, ApplicationCall>.logWithoutBody() {
-    context.attributes.put(REQUEST_LOG_BODY, false)
+fun RoutingContext.logWithoutBody() {
+    call.attributes.put(REQUEST_LOG_BODY, false)
 }
 
 val HttpStatusCode.defaultLogLevel: LogLevel
-    get() = when(value / 100) {
+    get() = when (value / 100) {
         5 -> LogLevel.ERROR
         4 -> LogLevel.WARNING
         else -> LogLevel.INFO
     }
 
-class RequestLogger private constructor(
-    private val logContext: ApplicationCall.(MutableLogContext) -> Unit,
-    private val canLogBody: ApplicationCall.() -> Boolean,
-    private val logger: JLogger,
-    private val logLevel: ApplicationCall.(Throwable?) -> LogLevel,
-) {
+class RequestLoggerConfiguration {
+    var logContext: ApplicationCall.(MutableLogContext) -> Unit = {}
+    var canLogBody: ApplicationCall.() -> Boolean = { false }
+    var logger: JLogger = JLog.get("RequestLogger")
+    var logLevel: ApplicationCall.(Throwable?) -> LogLevel = { response.status()?.defaultLogLevel ?: LogLevel.INFO }
+}
 
-    class Configuration {
-        var logContext: ApplicationCall.(MutableLogContext) -> Unit = {}
-        var canLogBody: ApplicationCall.() -> Boolean = { false }
-        var logger: JLogger = JLog.get("RequestLogger")
-        var logLevel: ApplicationCall.(Throwable?) -> LogLevel = { response.status()?.defaultLogLevel ?: LogLevel.INFO }
+private object RequestLoggerHook : Hook<suspend (ApplicationCall, suspend () -> Unit, CoroutineContext) -> Unit> {
+
+    val phase = PipelinePhase("RequestLog")
+
+    override fun install(
+        pipeline: ApplicationCallPipeline,
+        handler: suspend (ApplicationCall, suspend () -> Unit, CoroutineContext) -> Unit
+    ) {
+        pipeline.insertPhaseAfter(ApplicationCallPipeline.Monitoring, phase)
+        pipeline.intercept(phase) {
+            handler(call, ::proceed, coroutineContext)
+        }
     }
+}
 
-    companion object Feature : BaseApplicationPlugin<Application, Configuration, RequestLogger> {
+val RequestLogger = createRouteScopedPlugin("RequestLogger", { RequestLoggerConfiguration() }) {
 
-        val phase = PipelinePhase("RequestLog")
+    on(RequestLoggerHook) { call, proceed, coroutineContext ->
+        val logContext = CoroutineLogContext.get()
+        val meta = MutableLogContext()
 
-        override val key: AttributeKey<RequestLogger> = AttributeKey("RequestLogger")
+        val preHandleTime = Clock.System.now()
 
-        override fun install(pipeline: Application, configure: Configuration.() -> Unit): RequestLogger {
-            val configuration = Configuration().apply(configure)
-            val feature = RequestLogger(
-                configuration.logContext,
-                configuration.canLogBody,
-                configuration.logger,
-                configuration.logLevel,
-            )
+        logContext["preHandleTime"] = preHandleTime.toLocalDateTime(TimeZone.UTC)
+        meta["pathParameter"] = call.parameters.toKeyValueString()
+        meta["query"] = call.request.queryParameters.toKeyValueString()
 
-            pipeline.insertPhaseAfter(ApplicationCallPipeline.Monitoring, phase)
+        if (call.request.httpMethod.readableBody
+            && call.request.contentType().readableBody
+            && call.attributes.getOrNull(REQUEST_LOG_BODY) ?: pluginConfig.canLogBody(call)
+        ) {
+            meta["body"] = call.receiveText()
+        }
 
-            pipeline.intercept(phase) {
-                val logContext = CoroutineLogContext.get()
-                val meta = MutableLogContext()
+        pluginConfig.logContext(call, logContext)
 
-                val preHandleTime = Clock.System.now()
-
-                logContext["preHandleTime"] = preHandleTime.toLocalDateTime(TimeZone.UTC)
-                meta["pathParameter"] = context.parameters.toKeyValueString()
-                meta["query"] = context.request.queryParameters.toKeyValueString()
-
-                if (context.request.httpMethod.readableBody
-                    && context.request.contentType().readableBody
-                    && context.attributes.getOrNull(REQUEST_LOG_BODY) ?: feature.canLogBody(context)
-                ) {
-                    meta["body"] = context.receiveText()
-                }
-
-                feature.logContext(context, logContext)
-
-                withContext(logContext) {
-                    var exception: Exception? = null
-                    try {
-                        proceed()
-                    } catch (e: Exception) {
-                        exception = e
-                    }
-
-                    val postHandleTime = Clock.System.now()
-
-                    logContext["postHandleTime"] = postHandleTime.toLocalDateTime(TimeZone.UTC)
-                    logContext["durationToHandle"] = postHandleTime.toEpochMilliseconds() - preHandleTime.toEpochMilliseconds()
-
-                    if (context.attributes.getOrNull(REQUEST_LOG_ENABLE) != false) {
-                        val route = context.attributes.getOrNull(ATTRIBUTE_ROUTE)
-                            ?: "${context.request.path()}/(method:${context.request.httpMethod.value}"
-                        val status = context.response.status()?.value?.toString()
-
-                        feature.logger.sLog(feature.logLevel(context, exception), "$route - $status", exception, meta)
-                    }
-
-                    if (exception != null) {
-                        throw exception
-                    }
-                }
+        withContext(logContext) {
+            var exception: Exception? = null
+            try {
+                proceed()
+            } catch (e: Exception) {
+                exception = e
             }
 
-            return feature
+            val postHandleTime = Clock.System.now()
+
+            logContext["postHandleTime"] = postHandleTime.toLocalDateTime(TimeZone.UTC)
+            logContext["durationToHandle"] = postHandleTime.toEpochMilliseconds() - preHandleTime.toEpochMilliseconds()
+
+            val route = when (call) {
+                is RoutingCall -> call.route.toString()
+                is RoutingPipelineCall -> call.route.toString()
+                else -> "${call.request.path()}/(method:${call.request.httpMethod.value})"
+            }
+            val status = call.response.status()?.value?.toString()
+
+            if (call.attributes.getOrNull(REQUEST_LOG_ENABLE) != false) {
+                pluginConfig.logger.sLog(pluginConfig.logLevel(call, exception), "$route - $status", exception, meta)
+            }
+
+            if (exception != null) {
+                throw exception
+            }
         }
     }
 }

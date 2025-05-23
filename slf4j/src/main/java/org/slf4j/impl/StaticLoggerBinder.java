@@ -7,7 +7,7 @@ import org.slf4j.spi.LoggerFactoryBinder;
 @SuppressWarnings("deprecation")
 public class StaticLoggerBinder implements LoggerFactoryBinder {
 
-    public static String REQUESTED_API_VERSION = "2.0.5";
+    public static String REQUESTED_API_VERSION = "2.0.16";
 
     private static StaticLoggerBinder SINGLETON = new StaticLoggerBinder();
 

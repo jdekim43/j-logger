@@ -7,63 +7,43 @@ import io.ktor.util.*
 import kotlinx.coroutines.withContext
 import kr.jadekim.logger.context.MutableLogContext
 import kr.jadekim.logger.coroutine.context.CoroutineLogContext
+import kotlin.coroutines.CoroutineContext
 
-class JLogContext private constructor(
-    private val context: ApplicationCall.(MutableLogContext) -> Unit = {},
-) {
+class JLogContextConfiguration {
+    var setupContext: ApplicationCall.(MutableLogContext) -> Unit = {}
+}
 
-    class Configuration {
-        var context: ApplicationCall.(MutableLogContext) -> Unit = {}
+private object JLogContextHook : Hook<suspend (ApplicationCall, suspend () -> Unit, CoroutineContext) -> Unit> {
+
+    override fun install(
+        pipeline: ApplicationCallPipeline,
+        handler: suspend (ApplicationCall, suspend () -> Unit, CoroutineContext) -> Unit
+    ) {
+        pipeline.intercept(ApplicationCallPipeline.Setup) {
+            handler(call, ::proceed, coroutineContext)
+        }
     }
+}
 
-    companion object Feature : BaseApplicationPlugin<Application, Configuration, JLogContext> {
+val JLogContext = createRouteScopedPlugin("JLogContext", { JLogContextConfiguration() }) {
+    on(JLogContextHook) { call, proceed, coroutineContext ->
+        val logContext = CoroutineLogContext.get()
 
-        override val key: AttributeKey<JLogContext> = AttributeKey("JLogContext")
+        logContext["remoteAddress"] = call.request.host()
+        logContext["userAgent"] = call.request.userAgent()
+        logContext["headers"] = call.request.headers.toMap()
+        logContext["method"] = call.request.httpMethod
+        logContext["path"] = call.request.path()
+        logContext["route"] = when (call) {
+            is RoutingCall -> call.route.toString()
+            is RoutingPipelineCall -> call.route.toString()
+            else -> call.request.path()
+        }
 
-        internal val ATTRIBUTE_ROUTE = AttributeKey<Route>("JLogContext.route")
+        pluginConfig.setupContext(call, logContext)
 
-        override fun install(pipeline: Application, configure: Configuration.() -> Unit): JLogContext {
-            val configuration = Configuration().apply(configure)
-            val feature = JLogContext(configuration.context)
-
-            pipeline.environment.monitor.subscribe(Routing.RoutingCallStarted) {
-                it.attributes.put(ATTRIBUTE_ROUTE, it.route)
-            }
-
-            pipeline.intercept(ApplicationCallPipeline.Setup) {
-                val logContext = CoroutineLogContext.get()
-
-                logContext["remoteAddress"] = context.request.host()
-                logContext["userAgent"] = context.request.userAgent()
-                logContext["headers"] = context.request.headers.toMap()
-                logContext["method"] = context.request.httpMethod
-                logContext["path"] = context.request.path()
-
-                feature.context(context, logContext)
-
-                withContext(logContext) {
-                    proceed()
-                }
-            }
-
-            pipeline.intercept(ApplicationCallPipeline.Call) {
-                val logContext = coroutineContext[CoroutineLogContext] ?: return@intercept
-                val route = context.attributes.getOrNull(ATTRIBUTE_ROUTE)
-
-                logContext["route"] = route?.toString()
-
-                try {
-                    proceed()
-                } finally {
-                    logContext["status"] = context.response.status()?.value?.toString()
-
-                    if (route == null) {
-                        logContext["route"] = context.attributes.getOrNull(ATTRIBUTE_ROUTE)?.toString()
-                    }
-                }
-            }
-
-            return feature
+        withContext(logContext) {
+            proceed()
         }
     }
 }

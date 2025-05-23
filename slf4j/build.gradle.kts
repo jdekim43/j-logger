@@ -1,5 +1,3 @@
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-
 plugins {
     kotlin("jvm")
 }
@@ -7,13 +5,11 @@ plugins {
 dependencies {
     implementation(project(":"))
 
-    implementation("org.slf4j:slf4j-api:2.0.7")
+    implementation("org.slf4j:slf4j-api:2.0.17")
 }
 
-tasks.withType<KotlinCompile> {
-    val jvmTarget: String by rootProject
-
-    kotlinOptions.jvmTarget = jvmTarget
+kotlin {
+    jvmToolchain(8)
 }
 
 java {

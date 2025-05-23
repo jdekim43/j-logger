@@ -1,18 +1,20 @@
+import org.jreleaser.model.Active
+import org.jreleaser.model.Signing
+
 plugins {
-    kotlin("multiplatform") version "1.8.21"
-    id("org.jetbrains.dokka") version "1.8.10"
+    kotlin("multiplatform") version "2.0.21"
+    id("org.jetbrains.dokka") version "1.9.20"
     id("maven-publish")
-    id("signing")
+    id("org.jreleaser") version "1.18.0"
 }
 
 allprojects {
     apply {
         plugin("maven-publish")
-        plugin("signing")
     }
 
     group = "kr.jadekim"
-    version = "2.0.10"
+    version = "2.1.3"
 
     repositories {
         mavenCentral()
@@ -20,43 +22,17 @@ allprojects {
 
     publishing {
         repositories {
-            val ossrhUsername: String by project
-            val ossrhPassword: String by project
-
-            if (version.toString().endsWith("-SNAPSHOT", true)) {
-                maven {
-                    name = "mavenCentralSnapshot"
-                    setUrl("https://s01.oss.sonatype.org/content/repositories/snapshots/")
-                    credentials {
-                        username = ossrhUsername
-                        password = ossrhPassword
-                    }
-                }
-            } else {
-                maven {
-                    name = "mavenCentral"
-                    setUrl("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/")
-                    credentials {
-                        username = ossrhUsername
-                        password = ossrhPassword
-                    }
-                }
+            maven {
+                setUrl(layout.buildDirectory.dir("staging-deploy"))
             }
         }
-    }
-
-    signing {
-        sign(publishing.publications)
     }
 }
 
 kotlin {
-    jvm {
-        compilations.all {
-            val jvmTarget: String by rootProject
+    jvmToolchain(8)
 
-            kotlinOptions.jvmTarget = jvmTarget
-        }
+    jvm {
         testRuns["test"].executionTask.configure {
             useJUnitPlatform()
         }
@@ -75,8 +51,8 @@ kotlin {
 
                 implementation("org.jetbrains.kotlinx:kotlinx-datetime:$kotlinxDatetimeVersion")
 
-                implementation("co.touchlab:stately-concurrency:1.2.5")
-                implementation("co.touchlab:stately-collections:1.2.5")
+                implementation("co.touchlab:stately-concurrency:2.1.0")
+                implementation("co.touchlab:stately-collections:2.1.0")
             }
         }
         val commonTest by getting {
@@ -135,8 +111,63 @@ kotlin {
     }
 }
 
+jreleaser {
+    project {
+        author("Jade Kim")
+        license.set("Apache-2.0")
+        links {
+            vcsBrowser.set("https://github.com/jdekim43/j-logger")
+        }
+        inceptionYear.set("2021")
+    }
+
+    signing {
+        active.set(Active.ALWAYS)
+        armored.set(true)
+        mode.set(Signing.Mode.FILE)
+    }
+
+    deploy {
+        maven {
+            mavenCentral {
+                create("release") {
+                    active.set(Active.RELEASE)
+                    url.set("https://central.sonatype.com/api/v1/publisher")
+
+                    subprojects.forEach {
+                        stagingRepository(it.layout.buildDirectory.dir("staging-deploy").get().asFile.absolutePath)
+                    }
+                }
+            }
+            nexus2 {
+                create("snapshot") {
+                    active.set(Active.SNAPSHOT)
+                    url.set("https://central.sonatype.com/repository/maven-snapshots")
+                    snapshotUrl.set("https://central.sonatype.com/repository/maven-snapshots")
+                    applyMavenCentralRules.set(true)
+                    snapshotSupported.set(true)
+                    closeRepository.set(true)
+                    releaseRepository.set(true)
+
+                    subprojects.forEach {
+                        stagingRepository(it.layout.buildDirectory.dir("staging-deploy").get().asFile.absolutePath)
+                    }
+                }
+            }
+        }
+    }
+
+    release {
+        github {
+            repoOwner = "jdekim43"
+        }
+    }
+}
+
 tasks.named("publish") {
     subprojects.forEach {
-        finalizedBy("${it.name}:publish")
+        dependsOn("${it.name}:publish")
     }
+
+    finalizedBy(":jreleaserFullRelease")
 }
